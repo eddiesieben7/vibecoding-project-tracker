@@ -91,6 +91,7 @@ const EMPTY_FORM = {
   status: 'todo',
   assignee: TEAM[0],
   dueDate: '',
+  dueTime: '',
   contextTool: '',
 };
 
@@ -101,10 +102,11 @@ const INITIAL_ANCHORS = [
   { id: 'documentation', label: 'Documentation', url: '' },
 ];
 
-function getDueBg(dueDate, status) {
+function getDueBg(dueDate, dueTime, status) {
   if (status === 'done') return 'bg-dueneutral/40';
   if (!dueDate) return 'bg-surfacecard';
-  const diffHours = (new Date(dueDate) - new Date()) / 36e5;
+  const dateStr = dueTime ? `${dueDate}T${dueTime}` : dueDate;
+  const diffHours = (new Date(dateStr) - new Date()) / 36e5;
   if (diffHours < 0)  return 'bg-dueoverdue/60';
   if (diffHours < 24) return 'bg-duewarning/60';
   return 'bg-duesafe/40';
@@ -175,6 +177,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
     status:      task.status      ?? 'todo',
     assignee:    task.assignee    ?? TEAM[0],
     dueDate:     task.dueDate     ?? '',
+    dueTime:     task.dueTime     ?? '',
     contextTool: task.contextTool ?? '',
   });
   const [copied, setCopied] = useState(false);
@@ -200,6 +203,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
       id: task.id ?? String(Date.now()),
       createdDate: task.createdDate ?? new Date().toISOString().slice(0, 10),
       dueDate: form.dueDate || null,
+      dueTime: form.dueTime || null,
       context: task.context ?? '',
       contextTool: form.contextTool || null,
       contextUpdatedAt: form.contextTool !== (task.contextTool ?? '') ? new Date().toISOString() : task.contextUpdatedAt,
@@ -307,7 +311,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
             </div>
           </div>
 
-          {/* Assignee + Due Date */}
+          {/* Due Date + Due Time */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-textmuted mb-1">Due date</label>
@@ -315,6 +319,15 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
                 type="date"
                 value={form.dueDate}
                 onChange={e => set('dueDate', e.target.value)}
+                className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-textmuted mb-1">Due time</label>
+              <input
+                type="time"
+                value={form.dueTime}
+                onChange={e => set('dueTime', e.target.value)}
                 className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
               />
             </div>
@@ -412,7 +425,7 @@ function TaskCard({ task, onClick }) {
       draggable
       onDragStart={handleDragStart}
       onClick={() => onClick(task)}
-      className={`${getDueBg(task.dueDate, task.status)} rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab select-none`}
+      className={`${getDueBg(task.dueDate, task.dueTime, task.status)} rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab select-none`}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="text-sm font-light text-textprimary leading-snug">{task.title}</span>
@@ -429,7 +442,9 @@ function TaskCard({ task, onClick }) {
       )}
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-textmuted">{task.dueDate ?? 'No due date'}</span>
+        <span className="text-xs text-textmuted">
+          {task.dueDate ? `${task.dueDate}${task.dueTime ? ` @ ${task.dueTime}` : ''}` : 'No due date'}
+        </span>
         <div className="flex items-center gap-1.5">
           <InitialsBadge name={task.assignee} />
           <span className="text-xs text-textmuted font-medium">{task.assignee}</span>
