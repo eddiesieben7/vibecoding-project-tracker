@@ -97,8 +97,8 @@ Three lines of microcopy that capture the tone of the product. Keep it short —
 
 The tracker probably doesn't need a logo, but it does need a name and a wordmark style.
 
-- **Product name:** `<TODO>` (match PRD §11 team identity)
-- **Wordmark style:** `<TODO>` (e.g. "Just the name in the heading font, brand-primary color, no icon.")
+- **Product name:** Vibecoding Project Tracker
+- **Wordmark style:** Just the name in the heading font (Syne), text-primary color, no icon.
 
 ## 7. Out of scope (this hackathon)
 

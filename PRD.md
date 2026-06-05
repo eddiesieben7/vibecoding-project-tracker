@@ -113,17 +113,17 @@ Fill in the owner column. Recommended default in **bold**; change if your team h
 
 | # | Tag | Title | Suggested owner | Final owner |
 |---|---|---|---|---|
-| 3 | `data-model` | Task model + board view | **A** | `<TODO>` |
-| 4 | `crud-modal` | Add / edit / delete modal | **A** | `<TODO>` |
-| 5 | `tag-style` | Feature / bug colors | **B** | `<TODO>` |
-| 6 | `due-tint` | Due-date color tinting | **B** | `<TODO>` |
-| 7 | `prompt-ctx` | Prompt context field | **C** | `<TODO>` |
-| 8 | `copy-prompt` | Copy-to-prompt button | **C** | `<TODO>` |
-| 9 | `anchors` | Deliverable Anchor Board | **B** | `<TODO>` |
-| 10 | `preview-link` | Live preview URL slot | **B** | `<TODO>` |
-| 11 | `driver` | Driver + handoff | **A** | `<TODO>` |
-| 12 | `gh-fake` | GitHub mock badge | **C** | `<TODO>` |
-| 13 | `pitch-ready` | Demo + pitch rehearsal | **All** | `<TODO>` |
+| 3 | `data-model` | Task model + board view | **A** | Edgard |
+| 4 | `crud-modal` | Add / edit / delete modal | **A** | Edgard |
+| 5 | `tag-style` | Feature / bug colors | **B** | Aron |
+| 6 | `due-tint` | Due-date color tinting | **B** | Aron |
+| 7 | `prompt-ctx` | Prompt context field | **C** | Luisa |
+| 8 | `copy-prompt` | Copy-to-prompt button | **C** | Luisa |
+| 9 | `anchors` | Deliverable Anchor Board | **B** | Aron |
+| 10 | `preview-link` | Live preview URL slot | **B** | Aron |
+| 11 | `driver` | Driver + handoff | **A** | Edgard |
+| 12 | `gh-fake` | GitHub mock badge | **C** | Luisa |
+| 13 | `pitch-ready` | Demo + pitch rehearsal | **All** | All |
 
 Track A owns the state model. Track B owns the visuals. Track C owns the differentiator features (M7 + M8 — the prompt context pair). Put your strongest prompter on Track C.
 
@@ -146,9 +146,9 @@ Log your prompts inside the app itself once M7 is done. This becomes part of the
 
 Fill in:
 
-- **Team name:** `<TODO>`
-- **Tagline (one sentence):** `<TODO>`
-- **Tracker URL after deploy:** `<TODO>` (Vercel will give it to you)
+- **Team name:** Ibiza Disco
+- **Tagline (one sentence):** Track your vibes, ship your ideas.
+- **Tracker URL after deploy:** (to be added after Vercel deploy)
 
 ## 12. Out of scope (do not build)
 
