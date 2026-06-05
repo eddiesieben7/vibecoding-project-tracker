@@ -48,21 +48,21 @@ git push --tags
 
 Replace `<tag-name>` with the tag for the milestone you just finished — see the table below. Tag names are lowercase, hyphenated, exact.
 
-| # | Tag | What it means |
-|---|---|---|
-| 1 | `git-linked` | Repo registered on the portal, webhook delivers test ping |
-| 2 | `prd-done` | PRD reviewed, team-specific TODOs filled in |
-| 3 | `design-done` | DESIGN.md filled in, color tokens pasted into `tailwind.config.js` (parallel to M2) |
-| 4 | `data-model` | Four-column board renders with 3-4 mock tasks |
-| 5 | `crud-modal` | Add / edit / delete tasks via a modal, persisted to localStorage |
-| 6 | `tag-style` | Feature vs. bug visual distinction |
-| 7 | `task-owner` | Assignee badge on each card + "Hand off to..." dropdown |
-| 8 | `due-tint` | Cards change color as deadlines approach |
-| 9 | `context` | Curated Context field on the task modal (paste-ready briefing) |
-| 10 | `copy-prompt` | One-click copy formatted prompt to clipboard |
-| 11 | `project-deliverables` | Deliverable Anchor Board pinned above the Kanban |
-| 12 | `secret-sauce` | The one thing that makes your tracker uniquely yours (open-ended) |
-| 13 | `pitch-ready` | Demo dataset loaded, pitch rehearsed |
+| #   | Tag                    | What it means                                                                       |
+| --- | ---------------------- | ----------------------------------------------------------------------------------- |
+| 1   | `git-linked`           | Repo registered on the portal, webhook delivers test ping                           |
+| 2   | `prd-done`             | PRD reviewed, team-specific TODOs filled in                                         |
+| 3   | `design-done`          | DESIGN.md filled in, color tokens pasted into `tailwind.config.js` (parallel to M2) |
+| 4   | `data-model`           | Four-column board renders with 3-4 mock tasks                                       |
+| 5   | `crud-modal`           | Add / edit / delete tasks via a modal, persisted to localStorage                    |
+| 6   | `tag-style`            | Feature vs. bug visual distinction                                                  |
+| 7   | `task-owner`           | Assignee badge on each card + "Hand off to..." dropdown                             |
+| 8   | `due-tint`             | Cards change color as deadlines approach                                            |
+| 9   | `context`              | Curated Context field on the task modal (paste-ready briefing)                      |
+| 10  | `copy-prompt`          | One-click copy formatted prompt to clipboard                                        |
+| 11  | `project-deliverables` | Deliverable Anchor Board pinned above the Kanban                                    |
+| 12  | `secret-sauce`         | The one thing that makes your tracker uniquely yours (open-ended)                   |
+| 13  | `pitch-ready`          | Demo dataset loaded, pitch rehearsed                                                |
 
 ## Repo map
 
@@ -98,6 +98,8 @@ Re-deploys happen automatically on every push to `main`.
 
 Once M9 (`context`) is done, keep the Context field of each real task up to date as you work. By the end of the hackathon you should have a handful of curated context blocks on real tasks — those become part of your Module 5 "Vibe Coding History" deliverable. Free credit, just by using your own tool.
 
----
+## First commit
 
-*UXD Vibecoding Hackathon 2026 · Prof. Dr. Ignacio Alvarez*
+gitlinked
+
+_UXD Vibecoding Hackathon 2026 · Prof. Dr. Ignacio Alvarez_
