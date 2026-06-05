@@ -12,17 +12,17 @@
 
 One sentence that captures the feeling the tracker should leave you with.
 
-`<TODO>`
+`The tracker should give you a relieving feeling and should feel light.`
 
 Two or three references that capture the vibe (links to dribbble shots, screenshots of apps you admire, Pinterest boards — anything visual):
 
-- `<TODO>`
-- `<TODO>`
-- `<TODO>`
+- `https://dribbble.com/shots/27433821-Cabin-Booking-Web-Platform-with-Immersive-Animation`
+- `https://dribbble.com/shots/27414455-Pricing-settings-Untitled-UI`
+- `https://dribbble.com/shots/27436217-Mark-OS-hero-section`
 
 Anti-references — what we are explicitly **not** trying to look like:
 
-- `<TODO>`
+- `https://dribbble.com/shots/27439960-Growin-Finance-Management-Dashboard-Reports`
 
 ## 2. Color palette
 
@@ -32,12 +32,12 @@ These are the colors the build milestones will reference. Once chosen, paste the
 
 | Token | Hex | Where it shows up |
 |---|---|---|
-| `brand-primary` | `<TODO>` | Header, "+" button, focus rings |
-| `brand-accent` | `<TODO>` | Highlights, hover states, links |
-| `surface-page` | `<TODO>` | Page background |
-| `surface-card` | `<TODO>` | Card background |
-| `text-primary` | `<TODO>` | Body text |
-| `text-muted` | `<TODO>` | Captions, dates, counts |
+| `brand-primary` | `#D1D0BB` | Header, "+" button, focus rings |
+| `brand-accent` | `#F1F291` | Highlights, hover states, links |
+| `surface-page` | `#FBFAEE` | Page background |
+| `surface-card` | `#B5B392` | Card background |
+| `text-primary` | `#0C0C08` | Body text |
+| `text-muted` | `#313121` | Captions, dates, counts |
 
 ### Task type (M6 `tag-style`)
 
@@ -59,27 +59,27 @@ These are the colors the build milestones will reference. Once chosen, paste the
 
 | Role | Font | Why |
 |---|---|---|
-| Heading | `<TODO>` | `<TODO one sentence>` |
-| Body | `<TODO>` | `<TODO one sentence>` |
-| Monospace (tags, badges, code) | `<TODO>` | `<TODO one sentence>` |
+| Heading | `Syne` | `More interesting than a normal font, fits the feeling of the page` |
+| Body | `Inter` | `Fokus on readability` |
+| Monospace (tags, badges, code) | `Inter` | `Fokus on readability` |
 
 Suggested sizes (override only if the design demands it):
 
-- Page title: 24 px / semibold
-- Section header: 16 px / semibold uppercase
-- Card title: 14 px / medium
-- Body: 14 px / regular
-- Caption: 12 px / regular muted
+- Page title: 24 px / regular
+- Section header: 16 px / regular
+- Card title: 14 px / light
+- Body: 14 px / light
+- Caption: 12 px / light
 
 ## 4. Component principles
 
 One short sentence per element. These set the tone for the build phase — Person A's modal and Person B's anchor board should both feel like they came from this doc.
 
-- **Cards:** `<TODO>` (e.g. "Light, almost weightless; the only weight is from a 1px border, no shadow except on hover.")
-- **Buttons:** `<TODO>` (e.g. "Solid fill, no gradient, generous padding, rounded-md.")
-- **Modal:** `<TODO>` (e.g. "Centered, max-width-md, slate-900 backdrop at 50% opacity.")
-- **Empty states:** `<TODO>` (e.g. "Dashed border, muted text, never sad.")
-- **Drag affordance (if used):** `<TODO>` (e.g. "None — we use a status dropdown.")
+- **Cards:** `solid fill, no boarder, slightly rounded corners, hovereffect: shadow` 
+- **Buttons:** `Solid fill, one color, slightly rounded corners, hovereffect: shadow, no boarders`
+- **Modal:** `centered, one color, solid fill, slightly rounded corners, backdrop slightly darkened and blured out, no boarders`
+- **Empty states:** `no boarders, solid fill, one color` (e.g. "Dashed border, muted text, never sad.")
+- **Drag affordance (if used):** `is used` (e.g. "None — we use a status dropdown.")
 
 ## 5. Voice / microcopy
 
@@ -87,11 +87,11 @@ Three lines of microcopy that capture the tone of the product. Keep it short —
 
 | Where | Text |
 |---|---|
-| "+" button label | `<TODO>` (e.g. "+ Task" or "Add task" or "New") |
-| Empty column placeholder | `<TODO>` (e.g. "Nothing here yet — keep going.") |
-| Toast after "Copy as Prompt Context" | `<TODO>` (e.g. "Copied. Now paste it into the AI.") |
-| Confirm-delete message | `<TODO>` (e.g. "Delete this task? You can't undo.") |
-| Handoff toast (M7 `task-owner`) | `<TODO>` (e.g. "Handed off to {name}. They've got it.") |
+| "+" button label | `+ add Task` |
+| Empty column placeholder | `-` |
+| Toast after "Copy as Prompt Context" | `copied ✓` |
+| Confirm-delete message | `Are you sure? Deleting can´t be undone.` |
+| Handoff toast (M7 `task-owner`) | `Handed off to {name}.` |
 
 ## 6. Logo / wordmark
 
