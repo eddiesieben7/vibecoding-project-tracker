@@ -20,14 +20,19 @@ function getTaskColor(task) {
   return COLOR_FUTURE;
 }
 
-// Calculate dynamic radius to fit text in categories
+// Calculate dynamic radius to fit text in categories while preserving hierarchy size order
 function getCategoryRadius(name, isTopic) {
   const words = name.split(' ');
   const longestWord = words.reduce((a, b) => a.length > b.length ? a : b, '');
-  const charWidth = isTopic ? 7.2 : 5.8;
-  const approxWordWidth = longestWord.length * charWidth;
-  const minRadius = isTopic ? 32 : 24;
-  return Math.max(minRadius, approxWordWidth / 2 + 14);
+  if (isTopic) {
+    // Topic (Superior Category) is largest: bounded between 42px and 52px
+    const approxWordWidth = longestWord.length * 7.2;
+    return Math.min(52, Math.max(42, approxWordWidth / 2 + 14));
+  } else {
+    // Sub-topic is medium: bounded between 26px and 34px
+    const approxWordWidth = longestWord.length * 5.8;
+    return Math.min(34, Math.max(26, approxWordWidth / 2 + 10));
+  }
 }
 
 // Canvas wrapped text helper inside circles
@@ -247,7 +252,7 @@ export default function GraphView({ tasks, topics, onEditTask }) {
         id: task.id,
         type: 'task',
         label: task.title,
-        radius: 12,
+        radius: 14,
         color: taskColor,
         textColor: '#0C0C08',
         data: task,
@@ -543,9 +548,21 @@ export default function GraphView({ tasks, topics, onEditTask }) {
 
         if (node.type === 'topic') {
           ctx.font = `bold ${11}px Inter, sans-serif`;
+          const textWidth = ctx.measureText(node.label).width;
+          const maxAllowedWidth = node.radius * 2 - 12;
+          if (textWidth > maxAllowedWidth) {
+            const scaledFontSize = Math.max(8.5, 11 * (maxAllowedWidth / textWidth));
+            ctx.font = `bold ${scaledFontSize}px Inter, sans-serif`;
+          }
           drawWrappedText(ctx, node.label, node.x, node.y, node.radius);
         } else if (node.type === 'subtopic' && zoom >= 0.7) {
           ctx.font = `semibold ${9.5}px Inter, sans-serif`;
+          const textWidth = ctx.measureText(node.label).width;
+          const maxAllowedWidth = node.radius * 2 - 8;
+          if (textWidth > maxAllowedWidth) {
+            const scaledFontSize = Math.max(7.5, 9.5 * (maxAllowedWidth / textWidth));
+            ctx.font = `semibold ${scaledFontSize}px Inter, sans-serif`;
+          }
           drawWrappedText(ctx, node.label, node.x, node.y, node.radius);
         } else if (node.type === 'task' && zoom >= 1.25) {
           // Show assignee initials inside task circle
