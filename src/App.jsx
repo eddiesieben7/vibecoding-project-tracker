@@ -396,10 +396,16 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
 function TaskCard({ task, onClick }) {
   const isFeature = task.type === 'feature';
 
+  function handleDragStart(e) {
+    e.dataTransfer.setData('text/plain', task.id);
+  }
+
   return (
     <div
+      draggable
+      onDragStart={handleDragStart}
       onClick={() => onClick(task)}
-      className={`${getDueBg(task.dueDate, task.status)} rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
+      className={`${getDueBg(task.dueDate, task.status)} rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-grab select-none`}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="text-sm font-light text-textprimary leading-snug">{task.title}</span>
@@ -426,9 +432,39 @@ function TaskCard({ task, onClick }) {
   );
 }
 
-function Column({ stage, tasks, onCardClick }) {
+function Column({ stage, tasks, onCardClick, onDragDrop }) {
+  const [isOver, setIsOver] = useState(false);
+
+  function handleDragOver(e) {
+    e.preventDefault();
+  }
+
+  function handleDragEnter(e) {
+    e.preventDefault();
+    setIsOver(true);
+  }
+
+  function handleDragLeave() {
+    setIsOver(false);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setIsOver(false);
+    const taskId = e.dataTransfer.getData('text/plain');
+    if (taskId) {
+      onDragDrop(taskId, stage.id);
+    }
+  }
+
   return (
-    <div className="flex flex-col flex-1 min-w-0">
+    <div
+      className="flex flex-col flex-1 min-w-0"
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <div className="flex items-center justify-between mb-3 px-1">
         <h2 className="text-base font-normal text-textmuted">
           {stage.label}
@@ -438,7 +474,9 @@ function Column({ stage, tasks, onCardClick }) {
         </span>
       </div>
 
-      <div className="flex flex-col gap-2 flex-1 rounded-xl bg-brandprimary/40 p-2 min-h-32">
+      <div className={`flex flex-col gap-2 flex-1 rounded-xl p-2 min-h-32 transition-colors duration-200 ${
+        isOver ? 'bg-brandprimary/70' : 'bg-brandprimary/40'
+      }`}>
         {tasks.length === 0 ? (
           <div className="flex-1 flex items-center justify-center rounded-lg py-8 bg-brandprimary/30">
             <span className="text-xs text-textmuted">-</span>
@@ -469,6 +507,21 @@ export default function App() {
         : [...prev, task]
     );
     setEditing(null);
+  }
+
+  function handleDragDrop(taskId, targetStageId) {
+    setTasks(prev =>
+      prev.map(t => {
+        if (t.id === taskId) {
+          return {
+            ...t,
+            status: targetStageId,
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        return t;
+      })
+    );
   }
 
   function handleDelete(id) {
@@ -506,6 +559,7 @@ export default function App() {
             stage={stage}
             tasks={tasks.filter(t => t.status === stage.id)}
             onCardClick={setEditing}
+            onDragDrop={handleDragDrop}
           />
         ))}
       </main>
