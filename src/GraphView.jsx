@@ -20,6 +20,47 @@ function getTaskColor(task) {
   return COLOR_FUTURE;
 }
 
+// Calculate dynamic radius to fit text in categories
+function getCategoryRadius(name, isTopic) {
+  const words = name.split(' ');
+  const longestWord = words.reduce((a, b) => a.length > b.length ? a : b, '');
+  const charWidth = isTopic ? 7.2 : 5.8;
+  const approxWordWidth = longestWord.length * charWidth;
+  const minRadius = isTopic ? 32 : 24;
+  return Math.max(minRadius, approxWordWidth / 2 + 14);
+}
+
+// Canvas wrapped text helper inside circles
+function drawWrappedText(ctx, text, x, y, radius) {
+  const words = text.split(' ');
+  const lines = [];
+  let currentLine = words[0] || '';
+
+  for (let i = 1; i < words.length; i++) {
+    const word = words[i];
+    const testLine = currentLine + ' ' + word;
+    const testWidth = ctx.measureText(testLine).width;
+    // Allow padding
+    if (testWidth < radius * 2 - 16) {
+      currentLine = testLine;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+    }
+  }
+  lines.push(currentLine);
+
+  const fontSize = parseInt(ctx.font) || 10;
+  const lineHeight = fontSize * 1.25;
+  const totalHeight = lines.length * lineHeight;
+  let startY = y - totalHeight / 2 + lineHeight / 2;
+
+  lines.forEach(line => {
+    ctx.fillText(line, x, startY);
+    startY += lineHeight;
+  });
+}
+
 export default function GraphView({ tasks, topics, onEditTask }) {
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
@@ -151,11 +192,12 @@ export default function GraphView({ tasks, topics, onEditTask }) {
 
     // 1. Create Topic Nodes
     topics.filter(t => t.parentId === null).forEach(topic => {
+      const radius = getCategoryRadius(topic.name, true);
       currentNodes.push({
         id: topic.id,
         type: 'topic',
         label: topic.name,
-        radius: 28,
+        radius: radius,
         color: '#B5B392', // surfacecard
         textColor: '#0C0C08', // textprimary
         parentId: null,
@@ -165,11 +207,12 @@ export default function GraphView({ tasks, topics, onEditTask }) {
     // Add virtual "Standalone" topic node if there are uncategorized tasks
     const hasStandalone = activeTasks.some(t => !t.categories || t.categories.length === 0);
     if (hasStandalone) {
+      const radius = getCategoryRadius('Standalone Tasks', true);
       currentNodes.push({
         id: 'topic-standalone',
         type: 'topic',
         label: 'Standalone Tasks',
-        radius: 28,
+        radius: radius,
         color: '#D1D0BB', // brandprimary
         textColor: '#0C0C08',
         parentId: null,
@@ -178,21 +221,22 @@ export default function GraphView({ tasks, topics, onEditTask }) {
 
     // 2. Create Sub-topic Nodes
     topics.filter(t => t.parentId !== null).forEach(sub => {
+      const radius = getCategoryRadius(sub.name, false);
       currentNodes.push({
         id: sub.id,
         type: 'subtopic',
         label: sub.name,
-        radius: 20,
+        radius: radius,
         color: '#D1D0BB', // brandprimary
         textColor: '#313121', // textmuted
         parentId: sub.parentId,
       });
-      // Link Sub-topic to parent Topic
+      // Link Sub-topic to parent Topic (space out larger categories slightly)
       currentLinks.push({
         source: sub.parentId,
         target: sub.id,
         type: 'hierarchy',
-        length: 80,
+        length: 80 + (radius - 20),
       });
     });
 
@@ -292,9 +336,9 @@ export default function GraphView({ tasks, topics, onEditTask }) {
       const alpha = alphaRef.current;
 
       // Apply forces
-      // 1. Gravity / Center pull (stronger for topics)
+      // 1. Gravity / Center pull (topics do NOT gravitate strongly to center, subcategories/tasks do)
       nodes.forEach(node => {
-        const kGrav = node.type === 'topic' ? 0.015 : 0.005;
+        const kGrav = node.type === 'topic' ? 0.0015 : 0.008;
         node.vx += (centerX - node.x) * kGrav * alpha;
         node.vy += (centerY - node.y) * kGrav * alpha;
       });
@@ -315,7 +359,8 @@ export default function GraphView({ tasks, topics, onEditTask }) {
 
           // Repulsion exists only if at least one is visible (collapsed nodes merge inside parents)
           if (visibleA || visibleB) {
-            const repulsionStrength = nodeA.type === 'topic' && nodeB.type === 'topic' ? 1200 : 350;
+            // Strong repulsion between superior topics so they push apart to different areas
+            const repulsionStrength = nodeA.type === 'topic' && nodeB.type === 'topic' ? 9000 : 350;
             const force = repulsionStrength / (dist * dist);
             nodeA.vx -= force * (dx / dist) * alpha;
             nodeA.vy -= force * (dy / dist) * alpha;
@@ -498,10 +543,10 @@ export default function GraphView({ tasks, topics, onEditTask }) {
 
         if (node.type === 'topic') {
           ctx.font = `bold ${11}px Inter, sans-serif`;
-          ctx.fillText(node.label, node.x, node.y);
+          drawWrappedText(ctx, node.label, node.x, node.y, node.radius);
         } else if (node.type === 'subtopic' && zoom >= 0.7) {
-          ctx.font = `${9.5}px Inter, sans-serif`;
-          ctx.fillText(node.label, node.x, node.y);
+          ctx.font = `semibold ${9.5}px Inter, sans-serif`;
+          drawWrappedText(ctx, node.label, node.x, node.y, node.radius);
         } else if (node.type === 'task' && zoom >= 1.25) {
           // Show assignee initials inside task circle
           const initials = node.data.assignee
