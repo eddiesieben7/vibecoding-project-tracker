@@ -125,67 +125,67 @@ function TaskModal({ task, onSave, onDelete, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-textprimary/50 backdrop-blur-sm"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-          <h2 className="text-base font-semibold text-slate-900">
+      <div className="bg-surfacepage rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4">
+          <h2 className="text-base font-semibold font-heading text-textprimary">
             {isNew ? 'New task' : 'Edit task'}
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-xl leading-none"
+            className="text-textmuted hover:text-textprimary text-xl leading-none"
           >
             ×
           </button>
         </div>
 
-        <div className="px-5 py-4 flex flex-col gap-4">
+        <div className="px-5 py-2 flex flex-col gap-4">
           {/* Title */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Title *</label>
+            <label className="block text-xs font-medium text-textmuted mb-1">Title *</label>
             <input
               autoFocus
               type="text"
               value={form.title}
               onChange={e => set('title', e.target.value)}
               placeholder="What needs to be done?"
-              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary placeholder-textmuted focus:outline-none focus:ring-2 focus:ring-brandaccent"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Description</label>
+            <label className="block text-xs font-medium text-textmuted mb-1">Description</label>
             <textarea
               rows={3}
               value={form.description}
               onChange={e => set('description', e.target.value)}
               placeholder="More details..."
-              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 resize-none"
+              className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary placeholder-textmuted focus:outline-none focus:ring-2 focus:ring-brandaccent resize-none"
             />
           </div>
 
           {/* Type + Status */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Type</label>
+              <label className="block text-xs font-medium text-textmuted mb-1">Type</label>
               <select
                 value={form.type}
                 onChange={e => set('type', e.target.value)}
-                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
               >
                 <option value="feature">Feature</option>
                 <option value="bug">Bug</option>
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Status</label>
+              <label className="block text-xs font-medium text-textmuted mb-1">Status</label>
               <select
                 value={form.status}
                 onChange={e => set('status', e.target.value)}
-                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
               >
                 {STAGES.map(s => (
                   <option key={s.id} value={s.id}>{s.label}</option>
@@ -197,11 +197,11 @@ function TaskModal({ task, onSave, onDelete, onClose }) {
           {/* Assignee + Due Date */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Assignee</label>
+              <label className="block text-xs font-medium text-textmuted mb-1">Assignee</label>
               <select
                 value={form.assignee}
                 onChange={e => set('assignee', e.target.value)}
-                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
               >
                 {TEAM.map(name => (
                   <option key={name} value={name}>{name}</option>
@@ -209,12 +209,12 @@ function TaskModal({ task, onSave, onDelete, onClose }) {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">Due date</label>
+              <label className="block text-xs font-medium text-textmuted mb-1">Due date</label>
               <input
                 type="date"
                 value={form.dueDate}
                 onChange={e => set('dueDate', e.target.value)}
-                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
               />
             </div>
           </div>
@@ -222,10 +222,12 @@ function TaskModal({ task, onSave, onDelete, onClose }) {
           {/* TODO M9 task-context: add Context textarea + AI tool dropdown here */}
         </div>
 
-        <div className="flex items-center justify-between px-5 py-4 border-t border-slate-200 bg-slate-50">
+        <div className="flex items-center justify-between px-5 py-4 mt-2">
           {!isNew ? (
             <button
-              onClick={() => onDelete(task.id)}
+              onClick={() => {
+                if (window.confirm("Are you sure? Deleting can't be undone.")) onDelete(task.id);
+              }}
               className="text-sm text-red-600 hover:text-red-700 font-medium"
             >
               Delete task
@@ -236,16 +238,16 @@ function TaskModal({ task, onSave, onDelete, onClose }) {
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100"
+              className="px-4 py-2 text-sm rounded-lg bg-brandprimary text-textprimary hover:shadow-md transition-shadow"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={!form.title.trim()}
-              className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white font-medium hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm rounded-lg bg-textprimary text-surfacepage font-medium hover:shadow-md transition-shadow disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {isNew ? 'Add task' : 'Save changes'}
+              {isNew ? '+ add Task' : 'Save changes'}
             </button>
           </div>
         </div>
@@ -260,10 +262,11 @@ function TaskCard({ task, onClick }) {
   return (
     <div
       onClick={() => onClick(task)}
-      className="bg-white rounded-lg border border-slate-200 p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="bg-surfacecard rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
     >
       <div className="flex items-start justify-between gap-2 mb-2">
-        <span className="text-sm font-medium text-slate-900 leading-snug">{task.title}</span>
+        <span className="text-sm font-light text-textprimary leading-snug">{task.title}</span>
+        {/* TODO M6 tag-style: replace these colors with type-feature / type-bug tokens */}
         <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${
           isFeature ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
         }`}>
@@ -272,12 +275,12 @@ function TaskCard({ task, onClick }) {
       </div>
 
       {task.description && (
-        <p className="text-xs text-slate-500 mb-3 line-clamp-2">{task.description}</p>
+        <p className="text-xs text-textmuted mb-3 line-clamp-2">{task.description}</p>
       )}
 
       <div className="flex items-center justify-between">
-        <span className="text-xs text-slate-400">{task.dueDate ?? 'No due date'}</span>
-        <span className="text-xs bg-slate-100 text-slate-600 rounded-full px-2 py-0.5 font-medium">
+        <span className="text-xs text-textmuted">{task.dueDate ?? 'No due date'}</span>
+        <span className="text-xs bg-brandprimary text-textprimary rounded-full px-2 py-0.5 font-medium">
           {task.assignee}
         </span>
       </div>
@@ -289,18 +292,18 @@ function Column({ stage, tasks, onCardClick }) {
   return (
     <div className="flex flex-col flex-1 min-w-0">
       <div className="flex items-center justify-between mb-3 px-1">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-textmuted">
           {stage.label}
         </h2>
-        <span className="text-xs bg-slate-200 text-slate-600 rounded-full w-5 h-5 flex items-center justify-center font-medium">
+        <span className="text-xs bg-brandprimary text-textprimary rounded-full w-5 h-5 flex items-center justify-center font-medium">
           {tasks.length}
         </span>
       </div>
 
-      <div className="flex flex-col gap-2 flex-1 rounded-xl bg-slate-50 p-2 min-h-32">
+      <div className="flex flex-col gap-2 flex-1 rounded-xl bg-brandprimary/40 p-2 min-h-32">
         {tasks.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center border-2 border-dashed border-slate-200 rounded-lg py-8">
-            <span className="text-xs text-slate-400">Nothing here yet</span>
+          <div className="flex-1 flex items-center justify-center rounded-lg py-8">
+            <span className="text-xs text-textmuted">-</span>
           </div>
         ) : (
           tasks.map(task => (
@@ -337,17 +340,17 @@ export default function App() {
   // TODO M11 anchors: const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', [...]);
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6">
+    <div className="min-h-screen bg-surfacepage p-6">
       <header className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Vibecoding Project Tracker</h1>
-          <p className="text-sm text-slate-500">Ibiza Disco</p>
+          <h1 className="text-2xl font-heading text-textprimary">Vibecoding Project Tracker</h1>
+          <p className="text-sm text-textmuted">Ibiza Disco</p>
         </div>
         <button
           onClick={openNew}
-          className="flex items-center gap-1.5 bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors"
+          className="flex items-center gap-1.5 bg-textprimary text-surfacepage text-sm font-medium px-4 py-2 rounded-lg hover:shadow-md transition-shadow"
         >
-          <span className="text-lg leading-none">+</span> Add task
+          + add Task
         </button>
       </header>
 
