@@ -226,7 +226,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
           {/* Description */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="block text-xs font-medium text-textmuted">Description</label>
+              <label className="block text-xs font-medium text-textmuted">Context</label>
               <button
                 type="button"
                 onClick={handleCopyContext}
