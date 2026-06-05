@@ -54,6 +54,9 @@ export default function GraphView({ tasks, topics, onEditTask }) {
   // Track positions across renders for stability
   const nodePositionsRef = useRef({});
 
+  // Simulation cooling alpha (1.0 = warm/moving, decays to 0.0 = completely frozen/stationary)
+  const alphaRef = useRef(1.0);
+
   // Trigger expansion/collapse
   const toggleExpand = (nodeId) => {
     setExpandedNodes(prev => {
@@ -65,6 +68,7 @@ export default function GraphView({ tasks, topics, onEditTask }) {
       }
       return next;
     });
+    alphaRef.current = 1.0; // Reheat simulation to let it settle into its new positions
   };
 
   const isNodeVisible = useCallback((node) => {
@@ -259,7 +263,13 @@ export default function GraphView({ tasks, topics, onEditTask }) {
       nodes: currentNodes,
       links: currentLinks,
     };
+    alphaRef.current = 1.0; // Reheat simulation for new items
   }, [tasks, topics]);
+
+  // Reheat simulation on layout-affecting state changes
+  useEffect(() => {
+    alphaRef.current = 1.0;
+  }, [filterMode, zoom, expandedNodes]);
 
   // Physics Simulation Loop
   useEffect(() => {
@@ -272,12 +282,21 @@ export default function GraphView({ tasks, topics, onEditTask }) {
       const centerX = width / 2;
       const centerY = height / 2;
 
+      // If simulation is cold, just draw and skip forces to prevent movement
+      if (alphaRef.current < 0.005) {
+        draw();
+        animationFrameId = requestAnimationFrame(tick);
+        return;
+      }
+
+      const alpha = alphaRef.current;
+
       // Apply forces
       // 1. Gravity / Center pull (stronger for topics)
       nodes.forEach(node => {
         const kGrav = node.type === 'topic' ? 0.015 : 0.005;
-        node.vx += (centerX - node.x) * kGrav;
-        node.vy += (centerY - node.y) * kGrav;
+        node.vx += (centerX - node.x) * kGrav * alpha;
+        node.vy += (centerY - node.y) * kGrav * alpha;
       });
 
       // 2. Node Repulsion (Coulomb force)
@@ -298,10 +317,10 @@ export default function GraphView({ tasks, topics, onEditTask }) {
           if (visibleA || visibleB) {
             const repulsionStrength = nodeA.type === 'topic' && nodeB.type === 'topic' ? 1200 : 350;
             const force = repulsionStrength / (dist * dist);
-            nodeA.vx -= force * (dx / dist);
-            nodeA.vy -= force * (dy / dist);
-            nodeB.vx += force * (dx / dist);
-            nodeB.vy += force * (dy / dist);
+            nodeA.vx -= force * (dx / dist) * alpha;
+            nodeA.vy -= force * (dy / dist) * alpha;
+            nodeB.vx += force * (dx / dist) * alpha;
+            nodeB.vy += force * (dy / dist) * alpha;
           }
         }
       }
@@ -319,8 +338,8 @@ export default function GraphView({ tasks, topics, onEditTask }) {
         if (visibleSource && !visibleTarget) {
           const dx = sourceNode.x - targetNode.x;
           const dy = sourceNode.y - targetNode.y;
-          targetNode.vx += dx * 0.15;
-          targetNode.vy += dy * 0.15;
+          targetNode.vx += dx * 0.15 * alpha;
+          targetNode.vy += dy * 0.15 * alpha;
           return;
         }
 
@@ -332,10 +351,10 @@ export default function GraphView({ tasks, topics, onEditTask }) {
 
           const strength = link.type === 'hierarchy' ? 0.05 : 0.03;
           const force = (dist - link.length) * strength;
-          sourceNode.vx += force * (dx / dist);
-          sourceNode.vy += force * (dy / dist);
-          targetNode.vx -= force * (dx / dist);
-          targetNode.vy -= force * (dy / dist);
+          sourceNode.vx += force * (dx / dist) * alpha;
+          sourceNode.vy += force * (dy / dist) * alpha;
+          targetNode.vx -= force * (dx / dist) * alpha;
+          targetNode.vy -= force * (dy / dist) * alpha;
         }
       });
 
@@ -356,8 +375,8 @@ export default function GraphView({ tasks, topics, onEditTask }) {
           const minDist = nodeA.radius + nodeB.radius + 8;
           if (dist < minDist) {
             const overlap = minDist - dist;
-            const pushX = (dx / dist) * overlap * 0.5;
-            const pushY = (dy / dist) * overlap * 0.5;
+            const pushX = (dx / dist) * overlap * 0.5 * alpha;
+            const pushY = (dy / dist) * overlap * 0.5 * alpha;
             nodeA.x -= pushX;
             nodeA.y -= pushY;
             nodeB.x += pushX;
@@ -387,6 +406,9 @@ export default function GraphView({ tasks, topics, onEditTask }) {
           vy: node.vy,
         };
       });
+
+      // Cool down the simulation
+      alphaRef.current *= 0.95;
 
       draw();
       animationFrameId = requestAnimationFrame(tick);
@@ -576,6 +598,7 @@ export default function GraphView({ tasks, topics, onEditTask }) {
         drag.draggedNode.y = worldY;
         drag.draggedNode.fx = worldX;
         drag.draggedNode.fy = worldY;
+        alphaRef.current = 1.0; // Keep reheating during drag
       } else {
         // Panning the canvas
         const dx = e.clientX - drag.startX;
@@ -611,6 +634,7 @@ export default function GraphView({ tasks, topics, onEditTask }) {
         // Release dragged node constraints
         delete drag.draggedNode.fx;
         delete drag.draggedNode.fy;
+        alphaRef.current = 1.0; // Reheat so simulation settles into equilibrium
       }
 
       // If it was a click without dragging/moving the board, trigger navigation/expansion
