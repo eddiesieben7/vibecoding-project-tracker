@@ -99,11 +99,11 @@ Four columns, in this order, with these exact labels in the UI:
 
 Fill these in before tagging `prd-done`:
 
-| Slot | Name | GitHub handle |
-|---|---|---|
-| Teammate A | `<TODO>` | `<TODO>` |
-| Teammate B | `<TODO>` | `<TODO>` |
-| Teammate C | `<TODO>` | `<TODO>` |
+| Slot       | Name     | GitHub handle    |
+| ---------- | -------- | ---------------- |
+| Teammate A | Edgard   | @eddiesieben7 |
+| Teammate B | Aron     | AronThiele       |
+| Teammate C | Luisa    | lua0171          |
 
 These three names become the **only** allowed values for `Task.assignee`. No auth — just a dropdown.
 
