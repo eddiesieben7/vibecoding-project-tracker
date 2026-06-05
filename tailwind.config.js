@@ -11,8 +11,8 @@ export default {
         textprimary: '#0C0C08',
         textmuted: '#313121',
         // TODO M6 tag-style: replace with values from DESIGN.md §2 once B fills them in
-        feature: '#10B981',
-        bug: '#DC2626',
+        feature: '#016509',
+        bug: '#820D0D',
         // TODO M8 due-tint: add due-safe, due-warning, due-overdue, due-neutral
       },
       fontFamily: {
