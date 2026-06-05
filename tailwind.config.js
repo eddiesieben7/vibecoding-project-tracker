@@ -10,10 +10,8 @@ export default {
         surfacecard: '#B5B392',
         textprimary: '#0C0C08',
         textmuted: '#313121',
-        // TODO M6 tag-style: replace with values from DESIGN.md §2 once B fills them in
         feature: '#016509',
         bug: '#820D0D',
-        // TODO M8 due-tint: add due-safe, due-warning, due-overdue, due-neutral
         duesafe: '#9AD29F',
         duewarning: '#EED380',
         dueoverdue: '#EB9373',

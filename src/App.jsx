@@ -94,6 +94,15 @@ const EMPTY_FORM = {
   contextTool: '',
 };
 
+function getDueBg(dueDate, status) {
+  if (status === 'done') return 'bg-dueneutral/40';
+  if (!dueDate) return 'bg-surfacecard';
+  const diffHours = (new Date(dueDate) - new Date()) / 36e5;
+  if (diffHours < 0)  return 'bg-dueoverdue/60';
+  if (diffHours < 24) return 'bg-duewarning/60';
+  return 'bg-duesafe/40';
+}
+
 function getInitials(name) {
   return name
     .split(' ')
@@ -390,7 +399,7 @@ function TaskCard({ task, onClick }) {
   return (
     <div
       onClick={() => onClick(task)}
-      className="bg-surfacecard rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className={`${getDueBg(task.dueDate, task.status)} rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer`}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="text-sm font-light text-textprimary leading-snug">{task.title}</span>
