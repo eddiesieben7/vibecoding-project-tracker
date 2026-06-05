@@ -8,7 +8,7 @@ export const STAGES = [
 ];
 
 // Update B and C once teammates fill in PRD §8
-export const TEAM = ['Edgard', 'Teammate B', 'Teammate C'];
+export const TEAM = ['Edgard', 'Aron', 'Luisa'];
 
 export function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
@@ -62,7 +62,7 @@ const SEED_TASKS = [
     description: 'Header overlaps content on smaller screens.',
     type: 'bug',
     status: 'todo',
-    assignee: 'Teammate B',
+    assignee: 'Aron',
     dueDate: '2026-06-08',
     createdDate: '2026-06-05',
     context: '',
@@ -75,7 +75,7 @@ const SEED_TASKS = [
     description: 'Pick brand colors and fill in DESIGN.md.',
     type: 'feature',
     status: 'review',
-    assignee: 'Teammate B',
+    assignee: 'Aron',
     dueDate: '2026-06-05',
     createdDate: '2026-06-05',
     context: '',
@@ -404,7 +404,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
               disabled={!form.title.trim()}
               className="px-4 py-2 text-sm rounded-lg bg-textprimary text-surfacepage font-medium hover:shadow-md transition-shadow disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {isNew ? '+ add Task' : 'Save changes'}
+              {isNew ? '+ Add task' : 'Save changes'}
             </button>
           </div>
         </div>
@@ -572,7 +572,7 @@ export default function App() {
           onClick={openNew}
           className="flex items-center gap-1.5 bg-textprimary text-surfacepage text-sm font-medium px-4 py-2 rounded-lg hover:shadow-md transition-shadow"
         >
-          + add Task
+          + Add task
         </button>
       </header>
 
