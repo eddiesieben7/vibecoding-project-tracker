@@ -973,29 +973,41 @@ export default function GraphView({ tasks, topics, onEditTask }) {
             </div>
           )}
 
-          {selectedNode.type !== 'task' && (
-            <div className="flex flex-col gap-2 border-t border-brandprimary/40 pt-3 text-xs">
-              <span className="font-bold text-textprimary">Associated tasks in this category:</span>
-              <div className="flex flex-col gap-1.5 mt-1">
-                {tasks
-                  .filter(t => t.categories?.includes(selectedNode.id) || (selectedNode.id === 'topic-standalone' && (!t.categories || t.categories.length === 0)))
-                  .map(t => (
-                    <div 
-                      key={t.id}
-                      onClick={() => setSelectedNode({ id: t.id, type: 'task', label: t.title, color: getTaskColor(t), data: t, radius: 12 })}
-                      className="flex items-center justify-between p-2 rounded-lg bg-surfacepage hover:bg-brandprimary/30 border border-brandprimary/40 cursor-pointer transition-colors duration-200"
-                    >
-                      <span className="text-xs truncate max-w-[180px] font-medium text-textprimary">{t.title}</span>
-                      <span 
-                        className="w-2.5 h-2.5 rounded-full shrink-0" 
-                        style={{ backgroundColor: getTaskColor(t) }} 
-                        title={`Status: ${t.status}`}
-                      />
-                    </div>
-                  ))}
+          {selectedNode.type !== 'task' && (() => {
+            const childSubtopicIds = topics.filter(top => top.parentId === selectedNode.id).map(top => top.id);
+            const associatedTasks = tasks.filter(t => {
+              if (selectedNode.id === 'topic-standalone') {
+                return !t.categories || t.categories.length === 0;
+              }
+              return t.categories?.includes(selectedNode.id) || t.categories?.some(catId => childSubtopicIds.includes(catId));
+            });
+
+            return (
+              <div className="flex flex-col gap-2 border-t border-brandprimary/40 pt-3 text-xs">
+                <span className="font-bold text-textprimary">Associated tasks in this category:</span>
+                <div className="flex flex-col gap-1.5 mt-1">
+                  {associatedTasks.length === 0 ? (
+                    <span className="text-xs text-textmuted italic">No tasks in this category.</span>
+                  ) : (
+                    associatedTasks.map(t => (
+                      <div 
+                        key={t.id}
+                        onClick={() => setSelectedNode({ id: t.id, type: 'task', label: t.title, color: getTaskColor(t), data: t, radius: 14 })}
+                        className="flex items-center justify-between p-2 rounded-lg bg-surfacepage hover:bg-brandprimary/30 border border-brandprimary/40 cursor-pointer transition-colors duration-200"
+                      >
+                        <span className="text-xs truncate max-w-[180px] font-medium text-textprimary">{t.title}</span>
+                        <span 
+                          className="w-2.5 h-2.5 rounded-full shrink-0" 
+                          style={{ backgroundColor: getTaskColor(t) }} 
+                          title={`Status: ${t.status}`}
+                        />
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
     </div>
