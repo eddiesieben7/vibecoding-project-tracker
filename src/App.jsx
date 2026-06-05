@@ -93,7 +93,40 @@ const EMPTY_FORM = {
   dueDate: '',
 };
 
-function TaskModal({ task, onSave, onDelete, onClose }) {
+function getInitials(name) {
+  return name
+    .split(' ')
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function InitialsBadge({ name, size = 'sm' }) {
+  const sizeClass = size === 'lg'
+    ? 'w-8 h-8 text-sm'
+    : 'w-6 h-6 text-xs';
+  return (
+    <span className={`${sizeClass} rounded-full bg-brandaccent text-textprimary font-semibold flex items-center justify-center shrink-0`}>
+      {getInitials(name)}
+    </span>
+  );
+}
+
+function Toast({ message, onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2500);
+    return () => clearTimeout(t);
+  }, [onDone]);
+
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-textprimary text-surfacepage text-sm px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in">
+      {message}
+    </div>
+  );
+}
+
+function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
   const isNew = !task.id;
   const [form, setForm] = useState({
     title:       task.title       ?? '',
@@ -171,14 +204,27 @@ function TaskModal({ task, onSave, onDelete, onClose }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium text-textmuted mb-1">Type</label>
-              <select
-                value={form.type}
-                onChange={e => set('type', e.target.value)}
-                className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
-              >
-                <option value="feature">Feature</option>
-                <option value="bug">Bug</option>
-              </select>
+              <div className="flex gap-2">
+                {[
+                  { value: 'feature', icon: '✦', label: 'Feature' },
+                  { value: 'bug',     icon: '⚠', label: 'Bug' },
+                ].map(t => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => set('type', t.value)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-medium transition-shadow ${
+                      form.type === t.value
+                        ? t.value === 'feature'
+                          ? 'bg-feature/20 text-feature shadow-md'
+                          : 'bg-bug/20 text-bug shadow-md'
+                        : 'bg-brandprimary text-textmuted hover:shadow-sm'
+                    }`}
+                  >
+                    <span>{t.icon}</span>{t.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-textmuted mb-1">Status</label>
@@ -197,18 +243,6 @@ function TaskModal({ task, onSave, onDelete, onClose }) {
           {/* Assignee + Due Date */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-textmuted mb-1">Assignee</label>
-              <select
-                value={form.assignee}
-                onChange={e => set('assignee', e.target.value)}
-                className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
-              >
-                {TEAM.map(name => (
-                  <option key={name} value={name}>{name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
               <label className="block text-xs font-medium text-textmuted mb-1">Due date</label>
               <input
                 type="date"
@@ -216,6 +250,33 @@ function TaskModal({ task, onSave, onDelete, onClose }) {
                 onChange={e => set('dueDate', e.target.value)}
                 className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
               />
+            </div>
+          </div>
+
+          {/* M7 task-owner: Hand off */}
+          <div>
+            <label className="block text-xs font-medium text-textmuted mb-2">
+              {isNew ? 'Assign to' : 'Owner'}
+            </label>
+            <div className="flex items-center gap-2 flex-wrap">
+              {TEAM.map(name => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => {
+                    if (!isNew && name !== form.assignee) onHandoff(name);
+                    set('assignee', name);
+                  }}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-shadow ${
+                    form.assignee === name
+                      ? 'bg-textprimary text-surfacepage shadow-md'
+                      : 'bg-brandprimary text-textprimary hover:shadow-sm'
+                  }`}
+                >
+                  <InitialsBadge name={name} />
+                  {name}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -266,10 +327,10 @@ function TaskCard({ task, onClick }) {
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span className="text-sm font-light text-textprimary leading-snug">{task.title}</span>
-        {/* TODO M6 tag-style: replace these colors with type-feature / type-bug tokens */}
-        <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${
-          isFeature ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+        <span className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full flex items-center gap-1 ${
+          isFeature ? 'bg-feature/20 text-feature' : 'bg-bug/20 text-bug'
         }`}>
+          <span>{isFeature ? '✦' : '⚠'}</span>
           {task.type}
         </span>
       </div>
@@ -280,9 +341,10 @@ function TaskCard({ task, onClick }) {
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-textmuted">{task.dueDate ?? 'No due date'}</span>
-        <span className="text-xs bg-brandprimary text-textprimary rounded-full px-2 py-0.5 font-medium">
-          {task.assignee}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <InitialsBadge name={task.assignee} />
+          <span className="text-xs text-textmuted font-medium">{task.assignee}</span>
+        </div>
       </div>
     </div>
   );
@@ -292,7 +354,7 @@ function Column({ stage, tasks, onCardClick }) {
   return (
     <div className="flex flex-col flex-1 min-w-0">
       <div className="flex items-center justify-between mb-3 px-1">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-textmuted">
+        <h2 className="text-base font-normal text-textmuted">
           {stage.label}
         </h2>
         <span className="text-xs bg-brandprimary text-textprimary rounded-full w-5 h-5 flex items-center justify-center font-medium">
@@ -302,7 +364,7 @@ function Column({ stage, tasks, onCardClick }) {
 
       <div className="flex flex-col gap-2 flex-1 rounded-xl bg-brandprimary/40 p-2 min-h-32">
         {tasks.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center rounded-lg py-8">
+          <div className="flex-1 flex items-center justify-center rounded-lg py-8 bg-brandprimary/30">
             <span className="text-xs text-textmuted">-</span>
           </div>
         ) : (
@@ -317,7 +379,8 @@ function Column({ stage, tasks, onCardClick }) {
 
 export default function App() {
   const [tasks, setTasks] = useLocalStorage('vibetracker.tasks', SEED_TASKS);
-  const [editing, setEditing] = useState(null); // null = closed, {} = new task, task object = edit
+  const [editing, setEditing] = useState(null);
+  const [toast, setToast] = useState(null);
 
   function openNew() {
     setEditing({ ...EMPTY_FORM });
@@ -337,13 +400,17 @@ export default function App() {
     setEditing(null);
   }
 
+  function handleHandoff(name) {
+    setToast(`Handed off to ${name}.`);
+  }
+
   // TODO M11 anchors: const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', [...]);
 
   return (
     <div className="min-h-screen bg-surfacepage p-6">
       <header className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-heading text-textprimary">Vibecoding Project Tracker</h1>
+          <h1 className="text-2xl font-normal font-heading text-textprimary">Vibecoding Project Tracker</h1>
           <p className="text-sm text-textmuted">Ibiza Disco</p>
         </div>
         <button
@@ -373,8 +440,11 @@ export default function App() {
           onSave={handleSave}
           onDelete={handleDelete}
           onClose={() => setEditing(null)}
+          onHandoff={handleHandoff}
         />
       )}
+
+      {toast && <Toast message={toast} onDone={() => setToast(null)} />}
     </div>
   );
 }
