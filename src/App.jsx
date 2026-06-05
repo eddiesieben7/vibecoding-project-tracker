@@ -85,12 +85,13 @@ const SEED_TASKS = [
 ];
 
 const EMPTY_FORM = {
-  title: '',
-  description: '',
+  title: 'new task',
+  description: 'fill in description',
   type: 'feature',
   status: 'todo',
   assignee: TEAM[0],
   dueDate: '',
+  contextTool: '',
 };
 
 function getInitials(name) {
@@ -126,6 +127,29 @@ function Toast({ message, onDone }) {
   );
 }
 
+function formatLastUpdated(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return dateString;
+  
+  if (dateString.length === 10) {
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  }
+  
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
 function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
   const isNew = !task.id;
   const [form, setForm] = useState({
@@ -135,6 +159,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
     status:      task.status      ?? 'todo',
     assignee:    task.assignee    ?? TEAM[0],
     dueDate:     task.dueDate     ?? '',
+    contextTool: task.contextTool ?? '',
   });
 
   function set(field, value) {
@@ -151,8 +176,9 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
       createdDate: task.createdDate ?? new Date().toISOString().slice(0, 10),
       dueDate: form.dueDate || null,
       context: task.context ?? '',
-      contextTool: task.contextTool ?? null,
-      contextUpdatedAt: task.contextUpdatedAt ?? null,
+      contextTool: form.contextTool || null,
+      contextUpdatedAt: form.contextTool !== (task.contextTool ?? '') ? new Date().toISOString() : task.contextUpdatedAt,
+      updatedAt: new Date().toISOString(),
     });
   }
 
@@ -198,6 +224,13 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
               placeholder="More details..."
               className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary placeholder-textmuted focus:outline-none focus:ring-2 focus:ring-brandaccent resize-none"
             />
+            {!isNew && (
+              <div className="mt-1 text-right">
+                <span className="text-[10px] text-textmuted select-none">
+                  Last updated: {formatLastUpdated(task.updatedAt || task.createdDate)}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Type + Status */}
@@ -280,7 +313,23 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
             </div>
           </div>
 
-          {/* TODO M9 task-context: add Context textarea + AI tool dropdown here */}
+          {/* AI Tool */}
+          <div>
+            <label className="block text-xs font-medium text-textmuted mb-1">AI Tool</label>
+            <select
+              value={form.contextTool}
+              onChange={e => set('contextTool', e.target.value)}
+              className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary focus:outline-none focus:ring-2 focus:ring-brandaccent"
+            >
+              <option value="">None / Select AI Tool</option>
+              <option value="Claude">Claude</option>
+              <option value="ChatGPT">ChatGPT</option>
+              <option value="Cursor">Cursor</option>
+              <option value="Lovable">Lovable</option>
+              <option value="Replit">Replit</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
         </div>
 
         <div className="flex items-center justify-between px-5 py-4 mt-2">
