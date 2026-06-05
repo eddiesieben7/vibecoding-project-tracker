@@ -633,6 +633,27 @@ export default function App() {
       )}
 
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
+
+      {/* Legend for task colors */}
+      <div className="fixed bottom-6 right-6 z-40 bg-surfacecard/95 backdrop-blur-sm p-3.5 rounded-xl shadow-lg border border-brandprimary/40 flex flex-col gap-2 text-xs font-sans text-textprimary w-48">
+        <h3 className="font-semibold text-textmuted text-[10px] uppercase tracking-wider mb-1 select-none">Task Urgency</h3>
+        <div className="flex items-center gap-2.5">
+          <div className="w-3.5 h-3.5 rounded bg-duesafe/40 border border-textmuted/10 shrink-0" />
+          <span className="text-[11px] text-textprimary">More than 2 days out</span>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-3.5 h-3.5 rounded bg-duewarning/60 border border-textmuted/10 shrink-0" />
+          <span className="text-[11px] text-textprimary">Less than 24 hours</span>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-3.5 h-3.5 rounded bg-dueoverdue/60 border border-textmuted/10 shrink-0" />
+          <span className="text-[11px] text-textprimary">Past due (Overdue)</span>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <div className="w-3.5 h-3.5 rounded bg-dueneutral/40 border border-textmuted/10 shrink-0" />
+          <span className="text-[11px] text-textprimary">Done / Completed</span>
+        </div>
+      </div>
     </div>
   );
 }
