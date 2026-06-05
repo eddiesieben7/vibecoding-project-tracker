@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import GraphView from './GraphView';
 
 export const STAGES = [
   { id: 'todo',        label: 'To Do' },
@@ -33,66 +34,76 @@ const SEED_TASKS = [
   {
     id: 'seed-1',
     title: 'Set up Kanban board layout',
-    description: 'Build the four-column board with Tailwind CSS.',
+    context: 'Build the four-column board with Tailwind CSS.',
     type: 'feature',
     status: 'done',
     assignee: 'Edgard',
     dueDate: '2026-06-05',
     createdDate: '2026-06-05',
-    context: '',
     contextTool: null,
     contextUpdatedAt: null,
+    categories: ['subtopic-1-1'],
   },
   {
     id: 'seed-2',
     title: 'Add task modal (CRUD)',
-    description: 'Modal for creating and editing tasks with all fields.',
+    context: 'Modal for creating and editing tasks with all fields.',
     type: 'feature',
     status: 'in-progress',
     assignee: 'Edgard',
     dueDate: '2026-06-06',
     createdDate: '2026-06-05',
-    context: '',
     contextTool: null,
     contextUpdatedAt: null,
+    categories: ['subtopic-1-2'],
   },
   {
     id: 'seed-3',
     title: 'Fix header alignment bug',
-    description: 'Header overlaps content on smaller screens.',
+    context: 'Header overlaps content on smaller screens.',
     type: 'bug',
     status: 'todo',
     assignee: 'Aron',
     dueDate: '2026-06-08',
     createdDate: '2026-06-05',
-    context: '',
     contextTool: null,
     contextUpdatedAt: null,
+    categories: ['subtopic-1-1'],
   },
   {
     id: 'seed-4',
     title: 'Design color palette',
-    description: 'Pick brand colors and fill in DESIGN.md.',
+    context: 'Pick brand colors and fill in DESIGN.md.',
     type: 'feature',
     status: 'review',
     assignee: 'Aron',
     dueDate: '2026-06-05',
     createdDate: '2026-06-05',
-    context: '',
     contextTool: null,
     contextUpdatedAt: null,
+    categories: ['subtopic-2-1'],
   },
+];
+
+const SEED_TOPICS = [
+  { id: 'topic-1', name: 'Frontend', parentId: null },
+  { id: 'topic-2', name: 'Design', parentId: null },
+  { id: 'topic-3', name: 'Documentation', parentId: null },
+  { id: 'subtopic-1-1', name: 'Layout', parentId: 'topic-1' },
+  { id: 'subtopic-1-2', name: 'Interactivity', parentId: 'topic-1' },
+  { id: 'subtopic-2-1', name: 'Palette', parentId: 'topic-2' },
 ];
 
 const EMPTY_FORM = {
   title: 'new task',
-  description: 'fill in description',
+  context: 'fill in context',
   type: 'feature',
   status: 'todo',
   assignee: TEAM[0],
   dueDate: '',
   dueTime: '',
   contextTool: '',
+  categories: [],
 };
 
 const INITIAL_ANCHORS = [
@@ -168,26 +179,30 @@ function formatLastUpdated(dateString) {
   });
 }
 
-function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
+function TaskModal({ task, topics, onAddTopic, onAddSubtopic, onSave, onDelete, onClose, onHandoff }) {
   const isNew = !task.id;
   const [form, setForm] = useState({
     title:       task.title       ?? '',
-    description: task.description ?? '',
+    context:     task.context     ?? '',
     type:        task.type        ?? 'feature',
     status:      task.status      ?? 'todo',
     assignee:    task.assignee    ?? TEAM[0],
     dueDate:     task.dueDate     ?? '',
     dueTime:     task.dueTime     ?? '',
     contextTool: task.contextTool ?? '',
+    categories:  task.categories  ?? [],
   });
   const [copied, setCopied] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatParent, setNewCatParent] = useState('');
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
   }
 
   function handleCopyContext() {
-    const textToCopy = `**${form.title}**\n${form.description}`;
+    const textToCopy = `**${form.title}**\n${form.context}`;
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
@@ -204,9 +219,10 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
       createdDate: task.createdDate ?? new Date().toISOString().slice(0, 10),
       dueDate: form.dueDate || null,
       dueTime: form.dueTime || null,
-      context: task.context ?? '',
+      context: form.context.trim(),
       contextTool: form.contextTool || null,
       contextUpdatedAt: form.contextTool !== (task.contextTool ?? '') ? new Date().toISOString() : task.contextUpdatedAt,
+      categories: form.categories,
       updatedAt: new Date().toISOString(),
     });
   }
@@ -243,7 +259,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
             />
           </div>
 
-          {/* Description */}
+          {/* Context */}
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="block text-xs font-medium text-textmuted">Context</label>
@@ -257,8 +273,8 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
             </div>
             <textarea
               rows={3}
-              value={form.description}
-              onChange={e => set('description', e.target.value)}
+              value={form.context}
+              onChange={e => set('context', e.target.value)}
               placeholder="More details..."
               className="w-full rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary placeholder-textmuted focus:outline-none focus:ring-2 focus:ring-brandaccent resize-none"
             />
@@ -377,6 +393,148 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
               <option value="Other">Other</option>
             </select>
           </div>
+
+          {/* Categories Selector */}
+          <div className="relative">
+            <label className="block text-xs font-medium text-textmuted mb-1">Categories (Topics / Sub-topics)</label>
+            
+            {/* Selected Badges */}
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {form.categories.length === 0 ? (
+                <span className="text-xs text-textmuted/60 italic select-none">No categories selected (standalone)</span>
+              ) : (
+                form.categories.map(catId => {
+                  const cat = topics.find(t => t.id === catId);
+                  if (!cat) return null;
+                  const parent = cat.parentId ? topics.find(t => t.id === cat.parentId) : null;
+                  return (
+                    <span
+                      key={catId}
+                      className="inline-flex items-center gap-1 text-xs bg-brandaccent/20 text-textprimary border border-brandaccent/40 rounded-full px-2.5 py-0.5 font-medium select-none"
+                    >
+                      {parent ? `${parent.name} > ` : ''}{cat.name}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          set('categories', form.categories.filter(id => id !== catId));
+                        }}
+                        className="hover:text-red-600 text-xs font-bold leading-none ml-0.5"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Dropdown Toggle */}
+            <button
+              type="button"
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="w-full text-left rounded-lg bg-brandprimary px-3 py-2 text-sm text-textprimary hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-brandaccent flex items-center justify-between"
+            >
+              <span className="text-textmuted/85">Manage Categories...</span>
+              <span className="text-xs select-none">{dropdownOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {/* Floating Dropdown Panel */}
+            {dropdownOpen && (
+              <div className="absolute left-0 right-0 mt-1 z-50 bg-surfacepage rounded-lg shadow-xl border border-brandprimary/60 p-3 max-h-60 overflow-y-auto flex flex-col gap-3">
+                {/* List categories */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-textmuted select-none">Existing Categories</span>
+                  {topics.filter(t => t.parentId === null).map(parent => {
+                    const subs = topics.filter(t => t.parentId === parent.id);
+                    const isParentChecked = form.categories.includes(parent.id);
+                    return (
+                      <div key={parent.id} className="flex flex-col gap-1.5 pl-1 border-l-2 border-brandprimary/40">
+                        {/* Parent Topic */}
+                        <label className="flex items-center gap-2 text-sm text-textprimary font-medium cursor-pointer hover:text-brandaccent select-none">
+                          <input
+                            type="checkbox"
+                            checked={isParentChecked}
+                            onChange={() => {
+                              const newCats = isParentChecked
+                                ? form.categories.filter(id => id !== parent.id)
+                                : [...form.categories, parent.id];
+                              set('categories', newCats);
+                            }}
+                            className="rounded text-textprimary focus:ring-brandaccent cursor-pointer"
+                          />
+                          {parent.name}
+                        </label>
+
+                        {/* Sub-topics */}
+                        {subs.map(sub => {
+                          const isSubChecked = form.categories.includes(sub.id);
+                          return (
+                            <label key={sub.id} className="flex items-center gap-2 text-xs text-textmuted cursor-pointer hover:text-brandaccent pl-4 select-none">
+                              <input
+                                type="checkbox"
+                                checked={isSubChecked}
+                                onChange={() => {
+                                  const newCats = isSubChecked
+                                    ? form.categories.filter(id => id !== sub.id)
+                                    : [...form.categories, sub.id];
+                                  set('categories', newCats);
+                                }}
+                                className="rounded text-textprimary focus:ring-brandaccent cursor-pointer"
+                              />
+                              {sub.name}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Create New Category Form */}
+                <div className="border-t border-brandprimary/40 pt-2 flex flex-col gap-1.5">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-textmuted select-none">Create Category</span>
+                  <div className="flex flex-col gap-1">
+                    <input
+                      type="text"
+                      placeholder="Category name..."
+                      value={newCatName}
+                      onChange={e => setNewCatName(e.target.value)}
+                      className="w-full rounded-md bg-brandprimary/40 px-2 py-1 text-xs text-textprimary focus:outline-none focus:ring-1 focus:ring-brandaccent"
+                    />
+                    <div className="flex gap-1">
+                      <select
+                        value={newCatParent}
+                        onChange={e => setNewCatParent(e.target.value)}
+                        className="flex-1 rounded-md bg-brandprimary/40 px-2 py-1 text-xs text-textprimary focus:outline-none focus:ring-1 focus:ring-brandaccent"
+                      >
+                        <option value="">No Parent (Topic)</option>
+                        {topics.filter(t => t.parentId === null).map(t => (
+                          <option key={t.id} value={t.id}>Under {t.name}</option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!newCatName.trim()) return;
+                          if (newCatParent) {
+                            const newSub = onAddSubtopic(newCatName.trim(), newCatParent);
+                            set('categories', [...form.categories, newSub.id]);
+                          } else {
+                            const newTop = onAddTopic(newCatName.trim());
+                            set('categories', [...form.categories, newTop.id]);
+                          }
+                          setNewCatName('');
+                        }}
+                        className="bg-textprimary text-surfacepage px-2.5 py-1 text-[10px] font-bold rounded-md hover:shadow-sm"
+                      >
+                        Create
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-between px-5 py-4 mt-2">
@@ -437,8 +595,8 @@ function TaskCard({ task, onClick }) {
         </span>
       </div>
 
-      {task.description && (
-        <p className="text-xs text-textmuted mb-3 line-clamp-2">{task.description}</p>
+      {task.context && (
+        <p className="text-xs text-textmuted mb-3 line-clamp-2">{task.context}</p>
       )}
 
       <div className="flex items-center justify-between">
@@ -515,6 +673,26 @@ function Column({ stage, tasks, onCardClick, onDragDrop }) {
 
 export default function App() {
   const [tasks, setTasks] = useLocalStorage('vibetracker.tasks', SEED_TASKS);
+
+  // Migrate legacy 'description' fields to 'context'
+  useEffect(() => {
+    let changed = false;
+    const migrated = tasks.map(t => {
+      if ('description' in t) {
+        changed = true;
+        const newT = { ...t, context: t.context || t.description || '' };
+        delete newT.description;
+        return newT;
+      }
+      return t;
+    });
+    if (changed) {
+      setTasks(migrated);
+    }
+  }, [tasks, setTasks]);
+
+  const [topics, setTopics] = useLocalStorage('vibetracker.topics', SEED_TOPICS);
+  const [view, setView] = useState('board'); // 'board' or 'graph'
   const [editing, setEditing] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -568,12 +746,36 @@ export default function App() {
           <h1 className="text-2xl font-normal font-heading text-textprimary">Vibecoding Project Tracker</h1>
           <p className="text-sm text-textmuted">Ibiza Disco</p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-1.5 bg-textprimary text-surfacepage text-sm font-medium px-4 py-2 rounded-lg hover:shadow-md transition-shadow"
-        >
-          + Add task
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="flex rounded-lg bg-brandprimary/40 p-1 select-none">
+            <button
+              onClick={() => setView('board')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${
+                view === 'board'
+                  ? 'bg-textprimary text-surfacepage shadow-sm'
+                  : 'text-textmuted hover:text-textprimary'
+              }`}
+            >
+              Board View
+            </button>
+            <button
+              onClick={() => setView('graph')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 ${
+                view === 'graph'
+                  ? 'bg-textprimary text-surfacepage shadow-sm'
+                  : 'text-textmuted hover:text-textprimary'
+              }`}
+            >
+              Vibe Map
+            </button>
+          </div>
+          <button
+            onClick={openNew}
+            className="flex items-center gap-1.5 bg-textprimary text-surfacepage text-sm font-medium px-4 py-2 rounded-lg hover:shadow-md transition-shadow"
+          >
+            + Add task
+          </button>
+        </div>
       </header>
 
       {/* Anchor Board */}
@@ -625,21 +827,40 @@ export default function App() {
         </div>
       </section>
 
-      <main className="grid grid-cols-4 gap-4">
-        {STAGES.map(stage => (
-          <Column
-            key={stage.id}
-            stage={stage}
-            tasks={tasks.filter(t => t.status === stage.id)}
-            onCardClick={setEditing}
-            onDragDrop={handleDragDrop}
-          />
-        ))}
-      </main>
+      {view === 'board' ? (
+        <main className="grid grid-cols-4 gap-4">
+          {STAGES.map(stage => (
+            <Column
+              key={stage.id}
+              stage={stage}
+              tasks={tasks.filter(t => t.status === stage.id)}
+              onCardClick={setEditing}
+              onDragDrop={handleDragDrop}
+            />
+          ))}
+        </main>
+      ) : (
+        <GraphView
+          tasks={tasks}
+          topics={topics}
+          onEditTask={setEditing}
+        />
+      )}
 
       {editing !== null && (
         <TaskModal
           task={editing}
+          topics={topics}
+          onAddTopic={name => {
+            const newTopic = { id: 'topic-' + Date.now(), name, parentId: null };
+            setTopics(prev => [...prev, newTopic]);
+            return newTopic;
+          }}
+          onAddSubtopic={(name, parentId) => {
+            const newSub = { id: 'subtopic-' + Date.now(), name, parentId };
+            setTopics(prev => [...prev, newSub]);
+            return newSub;
+          }}
           onSave={handleSave}
           onDelete={handleDelete}
           onClose={() => setEditing(null)}
@@ -650,24 +871,26 @@ export default function App() {
       {toast && <Toast message={toast} onDone={() => setToast(null)} />}
 
       {/* Legend for task colors */}
-      <div className="fixed bottom-6 right-6 z-40 bg-brandprimary/40 backdrop-blur-sm p-3 rounded-xl shadow-md border border-brandprimary/30 flex flex-row items-center gap-4 text-xs font-sans text-textprimary">
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-duesafe/40 border border-textmuted/10 shrink-0" />
-          <span className="text-[11px] text-textprimary">More than 2 days out</span>
+      {view === 'board' && (
+        <div className="fixed bottom-6 right-6 z-40 bg-brandprimary/40 backdrop-blur-sm p-3 rounded-xl shadow-md border border-brandprimary/30 flex flex-row items-center gap-4 text-xs font-sans text-textprimary">
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-duesafe/40 border border-textmuted/10 shrink-0" />
+            <span className="text-[11px] text-textprimary">More than 2 days out</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-duewarning/60 border border-textmuted/10 shrink-0" />
+            <span className="text-[11px] text-textprimary">Less than 24 hours</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-dueoverdue/60 border border-textmuted/10 shrink-0" />
+            <span className="text-[11px] text-textprimary">Past due</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3.5 h-3.5 rounded bg-dueneutral/40 border border-textmuted/10 shrink-0" />
+            <span className="text-[11px] text-textprimary">Done</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-duewarning/60 border border-textmuted/10 shrink-0" />
-          <span className="text-[11px] text-textprimary">Less than 24 hours</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-dueoverdue/60 border border-textmuted/10 shrink-0" />
-          <span className="text-[11px] text-textprimary">Past due</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3.5 h-3.5 rounded bg-dueneutral/40 border border-textmuted/10 shrink-0" />
-          <span className="text-[11px] text-textprimary">Done</span>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
