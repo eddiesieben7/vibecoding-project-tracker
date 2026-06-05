@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import GraphView from './GraphView.jsx';
 
 export const STAGES = [
   { id: 'todo',        label: 'To Do' },
@@ -29,58 +30,202 @@ export function useLocalStorage(key, initialValue) {
   return [value, setValue];
 }
 
+const SEED_CATEGORIES = [
+  { id: 'cat-marketing',    name: 'Marketing',            parentId: null },
+  { id: 'cat-website',      name: 'Website',              parentId: 'cat-marketing' },
+  { id: 'cat-seo',          name: 'SEO',                  parentId: 'cat-marketing' },
+  { id: 'cat-social-media', name: 'Social Media',         parentId: 'cat-marketing' },
+  { id: 'cat-print',        name: 'Print',                parentId: 'cat-marketing' },
+  { id: 'cat-software',     name: 'Software Entwicklung', parentId: null },
+  { id: 'cat-debugging',    name: 'Debugging',            parentId: 'cat-software' },
+  { id: 'cat-neue-feature', name: 'neue Feature',         parentId: 'cat-software' },
+  { id: 'cat-neues-prog',   name: 'neues Programm',       parentId: 'cat-software' },
+];
+
 const SEED_TASKS = [
+  // ── Done ──────────────────────────────────────────────────────────
   {
     id: 'seed-1',
     title: 'Set up Kanban board layout',
     description: 'Build the four-column board with Tailwind CSS.',
-    type: 'feature',
-    status: 'done',
-    assignee: 'Edgard',
-    dueDate: '2026-06-05',
-    createdDate: '2026-06-05',
-    context: '',
-    contextTool: null,
-    contextUpdatedAt: null,
+    type: 'feature', status: 'done', assignee: 'Edgard',
+    dueDate: '2026-06-03', createdDate: '2026-06-01',
+    context: '', contextTool: 'Claude', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-neue-feature'],
   },
   {
     id: 'seed-2',
-    title: 'Add task modal (CRUD)',
-    description: 'Modal for creating and editing tasks with all fields.',
-    type: 'feature',
-    status: 'in-progress',
-    assignee: 'Edgard',
-    dueDate: '2026-06-06',
-    createdDate: '2026-06-05',
-    context: '',
-    contextTool: null,
-    contextUpdatedAt: null,
+    title: 'Define brand color tokens',
+    description: 'Fill DESIGN.md color palette and wire into tailwind.config.js.',
+    type: 'feature', status: 'done', assignee: 'Aron',
+    dueDate: '2026-06-03', createdDate: '2026-06-01',
+    context: '', contextTool: null, contextUpdatedAt: null,
+    categories: ['cat-marketing', 'cat-website'],
   },
   {
     id: 'seed-3',
-    title: 'Fix header alignment bug',
-    description: 'Header overlaps content on smaller screens.',
-    type: 'bug',
-    status: 'todo',
-    assignee: 'Aron',
-    dueDate: '2026-06-08',
-    createdDate: '2026-06-05',
-    context: '',
-    contextTool: null,
-    contextUpdatedAt: null,
+    title: 'Set up GitHub repo & branches',
+    description: 'Init repo, protect main, create feature branches for each milestone.',
+    type: 'feature', status: 'done', assignee: 'Edgard',
+    dueDate: '2026-06-02', createdDate: '2026-06-01',
+    context: '', contextTool: null, contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-neues-prog'],
   },
   {
     id: 'seed-4',
-    title: 'Design color palette',
-    description: 'Pick brand colors and fill in DESIGN.md.',
-    type: 'feature',
-    status: 'review',
-    assignee: 'Aron',
-    dueDate: '2026-06-05',
-    createdDate: '2026-06-05',
-    context: '',
-    contextTool: null,
-    contextUpdatedAt: null,
+    title: 'Write PRD & milestone plan',
+    description: 'Fill in all TODO sections in PRD.md and assign milestone owners.',
+    type: 'feature', status: 'done', assignee: 'Luisa',
+    dueDate: '2026-06-03', createdDate: '2026-06-01',
+    context: '', contextTool: 'ChatGPT', contextUpdatedAt: null,
+    categories: ['cat-software'],
+  },
+  {
+    id: 'seed-5',
+    title: 'Homepage hero section copy',
+    description: 'Write headline, subheadline and CTA text for the landing page.',
+    type: 'feature', status: 'done', assignee: 'Luisa',
+    dueDate: '2026-06-04', createdDate: '2026-06-02',
+    context: '', contextTool: 'Claude', contextUpdatedAt: null,
+    categories: ['cat-marketing', 'cat-website'],
+  },
+  // ── Review ────────────────────────────────────────────────────────
+  {
+    id: 'seed-6',
+    title: 'Task modal CRUD',
+    description: 'Modal for creating, editing and deleting tasks with all data fields.',
+    type: 'feature', status: 'review', assignee: 'Edgard',
+    dueDate: '2026-06-06', createdDate: '2026-06-03',
+    context: '', contextTool: 'Claude', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-neue-feature'],
+  },
+  {
+    id: 'seed-7',
+    title: 'SEO meta tags & sitemap',
+    description: 'Add title tags, open graph metadata and generate sitemap.xml.',
+    type: 'feature', status: 'review', assignee: 'Aron',
+    dueDate: '2026-06-07', createdDate: '2026-06-04',
+    context: '', contextTool: 'Cursor', contextUpdatedAt: null,
+    categories: ['cat-marketing', 'cat-seo'],
+  },
+  {
+    id: 'seed-8',
+    title: 'Instagram content calendar',
+    description: 'Plan 4-week posting schedule with content pillars and formats.',
+    type: 'feature', status: 'review', assignee: 'Luisa',
+    dueDate: '2026-06-08', createdDate: '2026-06-04',
+    context: '', contextTool: 'ChatGPT', contextUpdatedAt: null,
+    categories: ['cat-marketing', 'cat-social-media'],
+  },
+  {
+    id: 'seed-9',
+    title: 'Fix drag-and-drop on touch screens',
+    description: 'HTML5 DnD API does not fire correctly on iOS Safari — need a polyfill.',
+    type: 'bug', status: 'review', assignee: 'Edgard',
+    dueDate: '2026-06-06', createdDate: '2026-06-04',
+    context: '', contextTool: 'Cursor', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-debugging'],
+  },
+  // ── In Progress ───────────────────────────────────────────────────
+  {
+    id: 'seed-10',
+    title: 'Graph View — Obsidian-style',
+    description: 'vis-network force graph with category clustering and zoom reveal.',
+    type: 'feature', status: 'in-progress', assignee: 'Edgard',
+    dueDate: '2026-06-08', createdDate: '2026-06-05',
+    context: '', contextTool: 'Claude', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-neue-feature'],
+  },
+  {
+    id: 'seed-11',
+    title: 'Google Ads keyword research',
+    description: 'Find high-intent, low-competition keywords for the launch campaign.',
+    type: 'feature', status: 'in-progress', assignee: 'Luisa',
+    dueDate: '2026-06-09', createdDate: '2026-06-05',
+    context: '', contextTool: 'ChatGPT', contextUpdatedAt: null,
+    categories: ['cat-marketing', 'cat-seo'],
+  },
+  {
+    id: 'seed-12',
+    title: 'Print flyer design — A5',
+    description: 'Design double-sided A5 flyer for campus distribution.',
+    type: 'feature', status: 'in-progress', assignee: 'Aron',
+    dueDate: '2026-06-10', createdDate: '2026-06-05',
+    context: '', contextTool: null, contextUpdatedAt: null,
+    categories: ['cat-marketing', 'cat-print'],
+  },
+  {
+    id: 'seed-13',
+    title: 'LocalStorage persistence layer',
+    description: 'Implement useLocalStorage hook with auto-migration for schema changes.',
+    type: 'feature', status: 'in-progress', assignee: 'Edgard',
+    dueDate: '2026-06-07', createdDate: '2026-06-04',
+    context: '', contextTool: 'Claude', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-neue-feature'],
+  },
+  {
+    id: 'seed-14',
+    title: 'Modal closes on outside click bug',
+    description: 'Clicking the backdrop fires onSave instead of onClose in some cases.',
+    type: 'bug', status: 'in-progress', assignee: 'Luisa',
+    dueDate: '2026-06-07', createdDate: '2026-06-05',
+    context: '', contextTool: 'Cursor', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-debugging'],
+  },
+  // ── To Do ─────────────────────────────────────────────────────────
+  {
+    id: 'seed-15',
+    title: 'Vercel deploy & custom domain',
+    description: 'Connect GitHub repo to Vercel, configure domain and env variables.',
+    type: 'feature', status: 'todo', assignee: 'Edgard',
+    dueDate: '2026-06-10', createdDate: '2026-06-05',
+    context: '', contextTool: null, contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-neues-prog'],
+  },
+  {
+    id: 'seed-16',
+    title: 'TikTok teaser video (15 s)',
+    description: 'Short screen-recording demo of the tracker with trending audio.',
+    type: 'feature', status: 'todo', assignee: 'Luisa',
+    dueDate: '2026-06-11', createdDate: '2026-06-05',
+    context: '', contextTool: null, contextUpdatedAt: null,
+    categories: ['cat-marketing', 'cat-social-media'],
+  },
+  {
+    id: 'seed-17',
+    title: 'Anchor Board deliverable links',
+    description: 'Wire up the 4 anchor slots (Presentation, Demo, Report, Docs).',
+    type: 'feature', status: 'todo', assignee: 'Aron',
+    dueDate: '2026-06-09', createdDate: '2026-06-05',
+    context: '', contextTool: 'Claude', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-neue-feature'],
+  },
+  {
+    id: 'seed-18',
+    title: 'Due-date color tinting',
+    description: 'Card background changes based on urgency: safe / warning / overdue.',
+    type: 'feature', status: 'todo', assignee: 'Aron',
+    dueDate: '2026-06-08', createdDate: '2026-06-05',
+    context: '', contextTool: 'Cursor', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-neue-feature'],
+  },
+  {
+    id: 'seed-19',
+    title: 'Print roll-up banner artwork',
+    description: 'Design 85×200 cm roll-up for the pitch presentation.',
+    type: 'feature', status: 'todo', assignee: 'Luisa',
+    dueDate: '2026-06-11', createdDate: '2026-06-06',
+    context: '', contextTool: null, contextUpdatedAt: null,
+    categories: ['cat-marketing', 'cat-print'],
+  },
+  {
+    id: 'seed-20',
+    title: 'Lighthouse performance audit',
+    description: 'Run Lighthouse, fix CLS and LCP issues before final deploy.',
+    type: 'bug', status: 'todo', assignee: 'Edgard',
+    dueDate: '2026-06-10', createdDate: '2026-06-06',
+    context: '', contextTool: 'ChatGPT', contextUpdatedAt: null,
+    categories: ['cat-software', 'cat-debugging'],
   },
 ];
 
@@ -93,6 +238,7 @@ const EMPTY_FORM = {
   dueDate: '',
   dueTime: '',
   contextTool: '',
+  categories: [],
 };
 
 const INITIAL_ANCHORS = [
@@ -168,7 +314,148 @@ function formatLastUpdated(dateString) {
   });
 }
 
-function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
+function CategoryPicker({ value, onChange, categories, onCreateCategory }) {
+  const [open, setOpen] = useState(false);
+  const [newInput, setNewInput] = useState('');
+  const [addingParent, setAddingParent] = useState(false);
+  const [addingSubOf, setAddingSubOf] = useState(null);
+
+  const parents = categories.filter(c => !c.parentId);
+
+  function toggle(id) {
+    onChange(value.includes(id) ? value.filter(x => x !== id) : [...value, id]);
+  }
+
+  function getName(id) {
+    return categories.find(c => c.id === id)?.name ?? id;
+  }
+
+  function submitNew(parentId) {
+    const name = newInput.trim();
+    if (!name) return;
+    const newId = onCreateCategory(name, parentId ?? null);
+    onChange([...value, newId]);
+    setNewInput('');
+    setAddingParent(false);
+    setAddingSubOf(null);
+  }
+
+  function cancelNew() {
+    setNewInput('');
+    setAddingParent(false);
+    setAddingSubOf(null);
+  }
+
+  function newInputEl(parentId) {
+    return (
+      <div className="flex gap-1 mt-1">
+        <input
+          autoFocus
+          type="text"
+          value={newInput}
+          onChange={e => setNewInput(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') { e.preventDefault(); submitNew(parentId); }
+            if (e.key === 'Escape') cancelNew();
+          }}
+          placeholder={parentId ? 'Unterkategorie...' : 'Neue Kategorie...'}
+          className="flex-1 rounded bg-surfacepage px-2 py-1 text-xs text-textprimary focus:outline-none focus:ring-1 focus:ring-brandaccent"
+        />
+        <button type="button" onClick={() => submitNew(parentId)} className="text-xs px-2 py-1 bg-textprimary text-surfacepage rounded">✓</button>
+        <button type="button" onClick={cancelNew} className="text-xs px-2 py-1 bg-brandprimary text-textprimary rounded">✕</button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <label className="block text-xs font-medium text-textmuted mb-1">Categories</label>
+
+      {value.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {value.map(id => (
+            <span key={id} className="flex items-center gap-1 bg-brandaccent text-textprimary text-xs px-2 py-0.5 rounded-full font-medium">
+              {getName(id)}
+              <button type="button" onClick={() => toggle(id)} className="leading-none hover:opacity-60">×</button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full text-left text-sm text-textmuted bg-brandprimary px-3 py-2 rounded-lg hover:opacity-80 flex items-center gap-2"
+      >
+        <span className="text-xs">{open ? '▲' : '▼'}</span>
+        Kategorien wählen / erstellen
+      </button>
+
+      {open && (
+        <div className="mt-1.5 bg-brandprimary/50 rounded-lg p-3 flex flex-col gap-2 max-h-52 overflow-y-auto">
+          {parents.map(parent => {
+            const children = categories.filter(c => c.parentId === parent.id);
+            return (
+              <div key={parent.id}>
+                <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-textprimary">
+                  <input
+                    type="checkbox"
+                    checked={value.includes(parent.id)}
+                    onChange={() => toggle(parent.id)}
+                    className="accent-textprimary shrink-0"
+                  />
+                  {parent.name}
+                </label>
+
+                <div className="ml-5 mt-1 flex flex-col gap-1">
+                  {children.map(child => (
+                    <label key={child.id} className="flex items-center gap-2 cursor-pointer text-sm text-textprimary">
+                      <input
+                        type="checkbox"
+                        checked={value.includes(child.id)}
+                        onChange={() => toggle(child.id)}
+                        className="accent-textprimary shrink-0"
+                      />
+                      {child.name}
+                    </label>
+                  ))}
+
+                  {addingSubOf === parent.id
+                    ? newInputEl(parent.id)
+                    : (
+                      <button
+                        type="button"
+                        onClick={() => { setAddingSubOf(parent.id); setAddingParent(false); setNewInput(''); }}
+                        className="text-left text-xs text-textmuted hover:text-textprimary"
+                      >
+                        + Unterkategorie
+                      </button>
+                    )
+                  }
+                </div>
+              </div>
+            );
+          })}
+
+          {addingParent
+            ? newInputEl(null)
+            : (
+              <button
+                type="button"
+                onClick={() => { setAddingParent(true); setAddingSubOf(null); setNewInput(''); }}
+                className="text-left text-xs text-textmuted hover:text-textprimary font-semibold mt-1"
+              >
+                + Neue Überkategorie
+              </button>
+            )
+          }
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TaskModal({ task, onSave, onDelete, onClose, onHandoff, categories, onCreateCategory }) {
   const isNew = !task.id;
   const [form, setForm] = useState({
     title:       task.title       ?? '',
@@ -179,6 +466,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
     dueDate:     task.dueDate     ?? '',
     dueTime:     task.dueTime     ?? '',
     contextTool: task.contextTool ?? '',
+    categories:  task.categories  ?? [],
   });
   const [copied, setCopied] = useState(false);
 
@@ -207,6 +495,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
       context: task.context ?? '',
       contextTool: form.contextTool || null,
       contextUpdatedAt: form.contextTool !== (task.contextTool ?? '') ? new Date().toISOString() : task.contextUpdatedAt,
+      categories: form.categories ?? [],
       updatedAt: new Date().toISOString(),
     });
   }
@@ -377,6 +666,9 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
               <option value="Other">Other</option>
             </select>
           </div>
+
+          {/* Categories */}
+          <CategoryPicker value={form.categories} onChange={v => set('categories', v)} categories={categories} onCreateCategory={onCreateCategory} />
         </div>
 
         <div className="flex items-center justify-between px-5 py-4 mt-2">
@@ -555,7 +847,15 @@ export default function App() {
     setToast(`Handed off to ${name}.`);
   }
 
+  const [categories, setCategories] = useLocalStorage('vibetracker.categories', SEED_CATEGORIES);
   const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', INITIAL_ANCHORS);
+  const [view, setView] = useState('kanban');
+
+  function handleCreateCategory(name, parentId) {
+    const id = `cat-${Date.now()}`;
+    setCategories(prev => [...prev, { id, name, parentId }]);
+    return id;
+  }
 
   function handleAnchorChange(id, url) {
     setAnchors(prev => prev.map(a => a.id === id ? { ...a, url } : a));
@@ -568,12 +868,32 @@ export default function App() {
           <h1 className="text-2xl font-normal font-heading text-textprimary">Vibecoding Project Tracker</h1>
           <p className="text-sm text-textmuted">Ibiza Disco</p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-1.5 bg-textprimary text-surfacepage text-sm font-medium px-4 py-2 rounded-lg hover:shadow-md transition-shadow"
-        >
-          + Add task
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex rounded-lg overflow-hidden border border-brandprimary">
+            <button
+              onClick={() => setView('kanban')}
+              className={`px-3 py-2 text-sm font-medium transition-colors ${
+                view === 'kanban' ? 'bg-textprimary text-surfacepage' : 'bg-brandprimary text-textprimary hover:bg-brandprimary/70'
+              }`}
+            >
+              Board
+            </button>
+            <button
+              onClick={() => setView('graph')}
+              className={`px-3 py-2 text-sm font-medium transition-colors ${
+                view === 'graph' ? 'bg-textprimary text-surfacepage' : 'bg-brandprimary text-textprimary hover:bg-brandprimary/70'
+              }`}
+            >
+              Graph
+            </button>
+          </div>
+          <button
+            onClick={openNew}
+            className="flex items-center gap-1.5 bg-textprimary text-surfacepage text-sm font-medium px-4 py-2 rounded-lg hover:shadow-md transition-shadow"
+          >
+            + Add task
+          </button>
+        </div>
       </header>
 
       {/* Anchor Board */}
@@ -625,17 +945,21 @@ export default function App() {
         </div>
       </section>
 
-      <main className="grid grid-cols-4 gap-4">
-        {STAGES.map(stage => (
-          <Column
-            key={stage.id}
-            stage={stage}
-            tasks={tasks.filter(t => t.status === stage.id)}
-            onCardClick={setEditing}
-            onDragDrop={handleDragDrop}
-          />
-        ))}
-      </main>
+      {view === 'kanban' ? (
+        <main className="grid grid-cols-4 gap-4">
+          {STAGES.map(stage => (
+            <Column
+              key={stage.id}
+              stage={stage}
+              tasks={tasks.filter(t => t.status === stage.id)}
+              onCardClick={setEditing}
+              onDragDrop={handleDragDrop}
+            />
+          ))}
+        </main>
+      ) : (
+        <GraphView tasks={tasks} categories={categories} onTaskClick={setEditing} />
+      )}
 
       {editing !== null && (
         <TaskModal
@@ -644,6 +968,8 @@ export default function App() {
           onDelete={handleDelete}
           onClose={() => setEditing(null)}
           onHandoff={handleHandoff}
+          categories={categories}
+          onCreateCategory={handleCreateCategory}
         />
       )}
 
