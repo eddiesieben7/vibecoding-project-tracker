@@ -84,6 +84,176 @@ const SEED_TASKS = [
   },
 ];
 
+const EMPTY_FORM = {
+  title: '',
+  description: '',
+  type: 'feature',
+  status: 'todo',
+  assignee: TEAM[0],
+  dueDate: '',
+};
+
+function TaskModal({ task, onSave, onDelete, onClose }) {
+  const isNew = !task.id;
+  const [form, setForm] = useState({
+    title:       task.title       ?? '',
+    description: task.description ?? '',
+    type:        task.type        ?? 'feature',
+    status:      task.status      ?? 'todo',
+    assignee:    task.assignee    ?? TEAM[0],
+    dueDate:     task.dueDate     ?? '',
+  });
+
+  function set(field, value) {
+    setForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  function handleSave() {
+    if (!form.title.trim()) return;
+    onSave({
+      ...task,
+      ...form,
+      title: form.title.trim(),
+      id: task.id ?? String(Date.now()),
+      createdDate: task.createdDate ?? new Date().toISOString().slice(0, 10),
+      dueDate: form.dueDate || null,
+      context: task.context ?? '',
+      contextTool: task.contextTool ?? null,
+      contextUpdatedAt: task.contextUpdatedAt ?? null,
+    });
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50"
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+          <h2 className="text-base font-semibold text-slate-900">
+            {isNew ? 'New task' : 'Edit task'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 text-xl leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="px-5 py-4 flex flex-col gap-4">
+          {/* Title */}
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Title *</label>
+            <input
+              autoFocus
+              type="text"
+              value={form.title}
+              onChange={e => set('title', e.target.value)}
+              placeholder="What needs to be done?"
+              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400"
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Description</label>
+            <textarea
+              rows={3}
+              value={form.description}
+              onChange={e => set('description', e.target.value)}
+              placeholder="More details..."
+              className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-400 resize-none"
+            />
+          </div>
+
+          {/* Type + Status */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Type</label>
+              <select
+                value={form.type}
+                onChange={e => set('type', e.target.value)}
+                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              >
+                <option value="feature">Feature</option>
+                <option value="bug">Bug</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Status</label>
+              <select
+                value={form.status}
+                onChange={e => set('status', e.target.value)}
+                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              >
+                {STAGES.map(s => (
+                  <option key={s.id} value={s.id}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Assignee + Due Date */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Assignee</label>
+              <select
+                value={form.assignee}
+                onChange={e => set('assignee', e.target.value)}
+                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              >
+                {TEAM.map(name => (
+                  <option key={name} value={name}>{name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-slate-600 mb-1">Due date</label>
+              <input
+                type="date"
+                value={form.dueDate}
+                onChange={e => set('dueDate', e.target.value)}
+                className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+              />
+            </div>
+          </div>
+
+          {/* TODO M9 task-context: add Context textarea + AI tool dropdown here */}
+        </div>
+
+        <div className="flex items-center justify-between px-5 py-4 border-t border-slate-200 bg-slate-50">
+          {!isNew ? (
+            <button
+              onClick={() => onDelete(task.id)}
+              className="text-sm text-red-600 hover:text-red-700 font-medium"
+            >
+              Delete task
+            </button>
+          ) : (
+            <span />
+          )}
+          <div className="flex gap-2">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={!form.title.trim()}
+              className="px-4 py-2 text-sm rounded-md bg-slate-900 text-white font-medium hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isNew ? 'Add task' : 'Save changes'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TaskCard({ task, onClick }) {
   const isFeature = task.type === 'feature';
 
@@ -143,21 +313,42 @@ function Column({ stage, tasks, onCardClick }) {
 }
 
 export default function App() {
-  // TODO M5 crud-modal: replace the second element with setTasks and wire up the modal
-  const [tasks] = useLocalStorage('vibetracker.tasks', SEED_TASKS);
+  const [tasks, setTasks] = useLocalStorage('vibetracker.tasks', SEED_TASKS);
+  const [editing, setEditing] = useState(null); // null = closed, {} = new task, task object = edit
 
-  // TODO M5 crud-modal: const [editing, setEditing] = useState(null);
+  function openNew() {
+    setEditing({ ...EMPTY_FORM });
+  }
+
+  function handleSave(task) {
+    setTasks(prev =>
+      prev.some(t => t.id === task.id)
+        ? prev.map(t => t.id === task.id ? task : t)
+        : [...prev, task]
+    );
+    setEditing(null);
+  }
+
+  function handleDelete(id) {
+    setTasks(prev => prev.filter(t => t.id !== id));
+    setEditing(null);
+  }
 
   // TODO M11 anchors: const [anchors, setAnchors] = useLocalStorage('vibetracker.anchors', [...]);
 
   return (
     <div className="min-h-screen bg-slate-100 p-6">
-      <header className="mb-8 flex items-end justify-between">
+      <header className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Vibecoding Project Tracker</h1>
           <p className="text-sm text-slate-500">Ibiza Disco</p>
         </div>
-        {/* TODO M5 crud-modal: add "+" button here */}
+        <button
+          onClick={openNew}
+          className="flex items-center gap-1.5 bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-700 transition-colors"
+        >
+          <span className="text-lg leading-none">+</span> Add task
+        </button>
       </header>
 
       {/* TODO M11 anchors: render Anchor Board (Presentation / Demo / Report / Documentation) */}
@@ -168,10 +359,19 @@ export default function App() {
             key={stage.id}
             stage={stage}
             tasks={tasks.filter(t => t.status === stage.id)}
-            onCardClick={(task) => console.log('clicked', task)} // TODO M5: open modal
+            onCardClick={setEditing}
           />
         ))}
       </main>
+
+      {editing !== null && (
+        <TaskModal
+          task={editing}
+          onSave={handleSave}
+          onDelete={handleDelete}
+          onClose={() => setEditing(null)}
+        />
+      )}
     </div>
   );
 }
