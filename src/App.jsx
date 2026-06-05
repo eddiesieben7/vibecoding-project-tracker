@@ -177,7 +177,7 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
   }
 
   function handleCopyContext() {
-    const textToCopy = `Title: ${form.title}\nDescription: ${form.description}`;
+    const textToCopy = `**${form.title}**\n${form.description}`;
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
