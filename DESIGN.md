@@ -50,10 +50,10 @@ These are the colors the build milestones will reference. Once chosen, paste the
 
 | Token | Hex | When used |
 |---|---|---|
-| `due-safe` | `<TODO>` | More than 2 days out |
-| `due-warning` | `<TODO>` | Less than 24 hours |
-| `due-overdue` | `<TODO>` | Past due |
-| `due-neutral` | `<TODO>` | Done (overrides date) |
+| `due-safe` | `#9AD29F` | More than 2 days out |
+| `due-warning` | `#EED380` | Less than 24 hours |
+| `due-overdue` | `#EB9373` | Past due |
+| `due-neutral` | `#9BB8DA` | Done (overrides date) |
 
 ## 3. Typography
 

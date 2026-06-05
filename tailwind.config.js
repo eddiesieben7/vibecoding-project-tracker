@@ -14,6 +14,10 @@ export default {
         feature: '#016509',
         bug: '#820D0D',
         // TODO M8 due-tint: add due-safe, due-warning, due-overdue, due-neutral
+        duesafe: '#9AD29F',
+        duewarning: '#EED380',
+        dueoverdue: '#EB9373',
+        dueneutral: '#9BB8DA',
       },
       fontFamily: {
         heading: ['Syne', 'sans-serif'],
