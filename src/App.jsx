@@ -161,9 +161,18 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
     dueDate:     task.dueDate     ?? '',
     contextTool: task.contextTool ?? '',
   });
+  const [copied, setCopied] = useState(false);
 
   function set(field, value) {
     setForm(prev => ({ ...prev, [field]: value }));
+  }
+
+  function handleCopyContext() {
+    const textToCopy = `Title: ${form.title}\nDescription: ${form.description}`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }).catch(() => {});
   }
 
   function handleSave() {
@@ -216,7 +225,16 @@ function TaskModal({ task, onSave, onDelete, onClose, onHandoff }) {
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-medium text-textmuted mb-1">Description</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-medium text-textmuted">Description</label>
+              <button
+                type="button"
+                onClick={handleCopyContext}
+                className="text-xs bg-brandprimary text-textprimary px-2.5 py-0.5 rounded-md hover:shadow-sm transition-shadow font-medium"
+              >
+                {copied ? 'copied ✓' : 'Copy Context'}
+              </button>
+            </div>
             <textarea
               rows={3}
               value={form.description}
