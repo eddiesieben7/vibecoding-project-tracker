@@ -277,8 +277,8 @@ export default function GraphView({ tasks, topics, onEditTask }) {
 
     const tick = () => {
       const { nodes, links } = simulationRef.current;
-      const width = canvasRef.current?.width || 800;
-      const height = canvasRef.current?.height || 600;
+      const width = canvasRef.current?.clientWidth || 800;
+      const height = canvasRef.current?.clientHeight || 600;
       const centerX = width / 2;
       const centerY = height / 2;
 
@@ -675,6 +675,23 @@ export default function GraphView({ tasks, topics, onEditTask }) {
     setZoom(newZoom);
   };
 
+  // Double click zooms in centered around double clicked point
+  const handleDoubleClick = (e) => {
+    e.preventDefault();
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const newZoom = Math.min(zoom * 1.5, 3.5);
+
+    setPan(prev => ({
+      x: mouseX - (mouseX - prev.x) * (newZoom / zoom),
+      y: mouseY - (mouseY - prev.y) * (newZoom / zoom),
+    }));
+    setZoom(newZoom);
+    alphaRef.current = 1.0; // Reheat simulation
+  };
+
   return (
     <div className="flex gap-4 w-full h-[620px] select-none relative font-sans text-textprimary">
       {/* Simulation Workspace Container */}
@@ -688,6 +705,7 @@ export default function GraphView({ tasks, topics, onEditTask }) {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onWheel={handleWheel}
+          onDoubleClick={handleDoubleClick}
           className="w-full h-full block cursor-move"
         />
 
@@ -713,8 +731,38 @@ export default function GraphView({ tasks, topics, onEditTask }) {
             ))}
           </div>
 
-          <div className="bg-surfacepage border border-brandprimary/60 rounded-lg px-3 py-1.5 shadow-md text-xs font-medium text-textmuted select-none">
-            Zoom: {Math.round(zoom * 100)}%
+          <div className="flex bg-surfacepage border border-brandprimary/60 rounded-lg p-0.5 shadow-md items-center gap-1">
+            <button
+              onClick={() => {
+                setZoom(z => Math.max(z - 0.15, 0.35));
+                alphaRef.current = 1.0;
+              }}
+              title="Zoom Out"
+              className="w-6 h-6 flex items-center justify-center text-xs font-bold rounded hover:bg-brandprimary/40 text-textprimary transition-colors"
+            >
+              -
+            </button>
+            <button
+              onClick={() => {
+                setZoom(1);
+                setPan({ x: 0, y: 0 });
+                alphaRef.current = 1.0;
+              }}
+              title="Reset View"
+              className="px-2 py-0.5 text-[10px] font-semibold rounded hover:bg-brandprimary/40 text-textprimary transition-colors"
+            >
+              Reset ({Math.round(zoom * 100)}%)
+            </button>
+            <button
+              onClick={() => {
+                setZoom(z => Math.min(z + 0.15, 3.5));
+                alphaRef.current = 1.0;
+              }}
+              title="Zoom In"
+              className="w-6 h-6 flex items-center justify-center text-xs font-bold rounded hover:bg-brandprimary/40 text-textprimary transition-colors"
+            >
+              +
+            </button>
           </div>
         </div>
 

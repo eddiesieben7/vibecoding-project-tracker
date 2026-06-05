@@ -232,7 +232,7 @@ function TaskModal({ task, topics, onAddTopic, onAddSubtopic, onSave, onDelete, 
       className="fixed inset-0 z-50 flex items-center justify-center bg-textprimary/50 backdrop-blur-sm"
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-surfacepage rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="bg-surfacepage rounded-xl shadow-xl w-full max-w-md mx-4 overflow-y-auto max-h-[90vh]">
         <div className="flex items-center justify-between px-5 py-4">
           <h2 className="text-base font-semibold font-heading text-textprimary">
             {isNew ? 'New task' : 'Edit task'}
@@ -438,9 +438,9 @@ function TaskModal({ task, topics, onAddTopic, onAddSubtopic, onSave, onDelete, 
               <span className="text-xs select-none">{dropdownOpen ? '▲' : '▼'}</span>
             </button>
 
-            {/* Floating Dropdown Panel */}
+            {/* Relative Inline Category Panel */}
             {dropdownOpen && (
-              <div className="absolute left-0 right-0 mt-1 z-50 bg-surfacepage rounded-lg shadow-xl border border-brandprimary/60 p-3 max-h-60 overflow-y-auto flex flex-col gap-3">
+              <div className="mt-2 bg-brandprimary/20 rounded-xl border border-brandprimary/60 p-3 max-h-60 overflow-y-auto flex flex-col gap-3 shadow-inner">
                 {/* List categories */}
                 <div className="flex flex-col gap-2">
                   <span className="text-[10px] uppercase font-bold tracking-wider text-textmuted select-none">Existing Categories</span>
