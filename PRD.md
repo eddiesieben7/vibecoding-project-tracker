@@ -6,7 +6,7 @@
 
 ## 1. Problem
 
-Vibecoding teams have two recurring pains with large projects:
+UXD bachelors who vibecode their projects have two recurring pains:
 
 1. **They lose track of tasks.** Three teammates, a hundred small things, no shared view. Nothing tells them what state each task is actually in.
 2. **They lose track of prompts.** The AI gave them working code two days ago but no one remembers the prompt that produced it. When they need to iterate, they start from scratch.
@@ -15,8 +15,8 @@ A spreadsheet doesn't solve this. A real project tool (Linear, Jira, Notion) is 
 
 ## 2. Target users
 
-- **Primary:** the team members, for the remaining weeks of the summer semester.
-- **Secondary:** future cohorts of vibecoders taking the same class.
+- **Primary:** the three of us, for the remaining weeks of the summer semester.
+- **Secondary:** future cohorts of UXD bachelors doing the same module.
 
 We are designing the tool we ourselves will use. The pitch demo is also our first real user test.
 
@@ -31,7 +31,7 @@ Each task carries the prompt context that produced it, so any teammate can click
 
 ## 4. Primary user flow
 
-1. Open the Webapp. The board loads from local storage.
+1. Open the app. The board loads from local storage.
 2. Click "+" to add a task. Fill in title, type, assignee, due date, prompt context.
 3. Move the task across columns as you work.
 4. When stuck, click "Copy as Prompt Context" on a task and paste it into Claude/ChatGPT/Cursor to continue.
@@ -45,38 +45,44 @@ Locked. Do not change without team agreement.
 ```js
 // A single vibecoding task.
 Task = {
-  id: string, // uuid or timestamp string
+  id: string,                    // uuid or timestamp string
   title: string,
   description: string,
-  type: "feature" | "bug", // visual color coding
-  status: "todo" | "in-progress" | "review" | "done",
-  assignee: string, // one of the three teammate names from §8
-  dueDate: string | null, // ISO date 'YYYY-MM-DD'
-  createdDate: string, // ISO date 'YYYY-MM-DD'
+  type: 'feature' | 'bug',       // visual color coding
+  status: 'todo' | 'in-progress' | 'review' | 'done',
+  assignee: string,              // one of the three teammate names from §8
+  dueDate: string | null,        // ISO date 'YYYY-MM-DD'
+  createdDate: string,           // ISO date 'YYYY-MM-DD'
 
   // Added in later milestones:
-  context: string, // M9 context — curated briefing for the next AI / teammate
-  contextTool: string | null, // M9 context — 'Claude' | 'ChatGPT' | 'Cursor' | 'Lovable' | 'Replit' | 'Other'
-  contextUpdatedAt: string | null, // M9 context — ISO timestamp set automatically on save
-};
+  promptContext: {               // M7 prompt-ctx
+    prompt: string,              // the actual prompt text
+    aiTool: string,              // 'Claude' | 'ChatGPT' | 'Cursor' | 'Lovable' | 'Replit' | 'Other'
+    outcome: string,             // 'worked' | 'iterated' | 'scrapped'
+  } | null,
+  previewUrl: string | null,     // M10 preview-link
+  githubBranch: string | null,   // M12 gh-fake
+  prUrl: string | null,          // M12 gh-fake
+  prStatus: 'draft' | 'open' | 'merged' | null,  // M12 gh-fake
+}
 
 // One of four pinned deliverable slots.
 Anchor = {
-  id: "presentation" | "demo" | "report" | "documentation",
-  label: string, // human-readable
-  url: string | null, // the link the team pastes in
-};
+  id: 'presentation' | 'demo' | 'report' | 'documentation',
+  label: string,                 // human-readable
+  url: string | null,            // the link the team pastes in
+}
 ```
 
 ## 6. Tech stack
 
-| Layer       | Choice                                      | Why                                                              |
-| ----------- | ------------------------------------------- | ---------------------------------------------------------------- |
-| Framework   | React (via Vite)                            | What the scaffold ships with. Don't migrate.                     |
-| Styling     | Tailwind                                    | Already configured. Use utility classes; no separate CSS files.  |
-| State       | React `useState` + a `useLocalStorage` hook | Simple, no library needed.                                       |
-| Persistence | **localStorage**                            | Zero infra. Pick this. Do not switch to a backend mid-hackathon. |
-| Deploy      | Vercel                                      | One-click deploy from GitHub.                                    |
+| Layer | Choice | Why |
+|---|---|---|
+| Framework | React (via Vite) | What the scaffold ships with. Don't migrate. |
+| Styling | Tailwind | Already configured. Use utility classes; no separate CSS files. |
+| State | React `useState` + a `useLocalStorage` hook | Simple, no library needed. |
+| Persistence | **localStorage** | Zero infra. Pick this. Do not switch to a backend mid-hackathon. |
+| Deploy | Vercel | One-click deploy from GitHub. |
 
 > **Decision:** localStorage, not a shared backend. If you want a shared backend later, that's M14 — out of scope for the hackathon.
 
@@ -93,11 +99,11 @@ Four columns, in this order, with these exact labels in the UI:
 
 Fill these in before tagging `prd-done`:
 
-| Slot       | Name     | GitHub handle    |
-| ---------- | -------- | ---------------- |
-| Teammate A | Edgard   | `@eddiesieben7`  |
-| Teammate B | Aron | `AronThiele`         |
-| Teammate C | `<TODO>` | `<TODO>`         |
+| Slot | Name | GitHub handle |
+|---|---|---|
+| Teammate A | `<TODO>` | `<TODO>` |
+| Teammate B | `<TODO>` | `<TODO>` |
+| Teammate C | `<TODO>` | `<TODO>` |
 
 These three names become the **only** allowed values for `Task.assignee`. No auth — just a dropdown.
 
@@ -105,57 +111,53 @@ These three names become the **only** allowed values for `Task.assignee`. No aut
 
 Fill in the owner column. Recommended default in **bold**; change if your team has different strengths.
 
-| #   | Tag            | Title                             | Suggested owner | Final owner |
-| --- | -------------- | --------------------------------- | --------------- | ----------- |
-| 3   | `design-done`  | Design system + voice (DESIGN.md) | **B**           | B           |
-| 4   | `data-model`   | Task model + board view           | **A**           | A (Edgard)  |
-| 5   | `crud-modal`   | Add / edit / delete modal         | **A**           | A (Edgard)  |
-| 6   | `tag-style`    | Feature / bug colors              | **B**           | B           |
-| 7   | `task-owner`   | Owner indicator + handoff         | **A**           | A (Edgard)  |
-| 8   | `due-tint`     | Due-date color tinting            | **B**           | B           |
-| 9   | `context`      | Context field on the task modal   | **C**           | C           |
-| 10  | `copy-prompt`  | "Copy as Prompt Context" button   | **C**           | C           |
-| 11  | `anchors`      | Deliverable Anchor Board          | **B**           | B           |
-| 12  | `secret-sauce` | The one thing that makes it yours | **C / All**     | All         |
-| 13  | `pitch-ready`  | Demo + pitch rehearsal            | **All**         | All         |
+| # | Tag | Title | Suggested owner | Final owner |
+|---|---|---|---|---|
+| 3 | `data-model` | Task model + board view | **A** | `<TODO>` |
+| 4 | `crud-modal` | Add / edit / delete modal | **A** | `<TODO>` |
+| 5 | `tag-style` | Feature / bug colors | **B** | `<TODO>` |
+| 6 | `due-tint` | Due-date color tinting | **B** | `<TODO>` |
+| 7 | `prompt-ctx` | Prompt context field | **C** | `<TODO>` |
+| 8 | `copy-prompt` | Copy-to-prompt button | **C** | `<TODO>` |
+| 9 | `anchors` | Deliverable Anchor Board | **B** | `<TODO>` |
+| 10 | `preview-link` | Live preview URL slot | **B** | `<TODO>` |
+| 11 | `driver` | Driver + handoff | **A** | `<TODO>` |
+| 12 | `gh-fake` | GitHub mock badge | **C** | `<TODO>` |
+| 13 | `pitch-ready` | Demo + pitch rehearsal | **All** | `<TODO>` |
 
-Track A owns the state model and task ownership. Track B owns the visuals (and design — M3 runs parallel to M2 so the team starts Phase 3 with the palette already chosen). Track C owns the differentiator features (M9 + M10 — the context field and the Copy-as-Prompt button) and usually leads on M12 secret-sauce. Put your strongest prompter on Track C.
+Track A owns the state model. Track B owns the visuals. Track C owns the differentiator features (M7 + M8 — the prompt context pair). Put your strongest prompter on Track C.
 
-**Dependency note.** M3 (`design-done`) runs **in parallel with M2** — Person B drafts DESIGN.md and pastes the colors into `tailwind.config.js` while the rest of the team reviews the PRD. M6 / M7 / M8 / M11 all depend on M4 + M5 being done first. While Person A builds M4+M5 (first ~60 min of Phase 3), Person C should draft the Markdown template for the "Copy as Prompt Context" output (M10). M12 `secret-sauce` is open-ended — pick whatever makes the tracker uniquely yours; constraint is "must be visible in the demo and must not break anything else."
+**Dependency note.** M5 / M6 / M9 / M10 / M11 / M12 all depend on M3 + M4 being done first. While Person A builds M3+M4 (first ~60 min), Person B should set up Tailwind tokens and the Anchor Board mockup, Person C should draft the Markdown template for the "Copy as Prompt Context" output.
 
 ## 10. AI / vibe coding angle
 
 Where AI will be heavily used:
-
-- M4, M5: scaffold the board and the modal from a single prompt each.
-- M9, M10: write the Markdown serialization helper for the Context field.
-- M7: animation polish for the handoff toast.
+- M3, M4: scaffold the board and the modal from a single prompt each.
+- M7, M8: write the Markdown serialization helper.
+- M11: animation polish for the handoff toast.
 
 Where AI will **not** save you time:
-
 - M2 (this PRD review) — read it yourself.
-- M3 (DESIGN.md) — design taste is yours, not the model's.
-- M12 (secret-sauce) — the whole point is that AI can't predict it.
 - M13 (pitch) — write the script in your own voice.
 
-Keep the Context field of each real task up to date as you work. By the end of the hackathon you should have a handful of curated context blocks — those become part of your Module 5 "Vibe Coding History" deliverable.
+Log your prompts inside the app itself once M7 is done. This becomes part of the Module 5 "Vibe Coding History" deliverable.
 
 ## 11. Team identity
 
 Fill in:
 
-- **Team name:** `Ibiza Disco`
-- **Tagline (one sentence):** `<TODO — fill in together as a team>`
-- **Tracker URL after deploy:** `(https://vibecoding-project-tracker-psi.vercel.app/)`
+- **Team name:** `<TODO>`
+- **Tagline (one sentence):** `<TODO>`
+- **Tracker URL after deploy:** `<TODO>` (Vercel will give it to you)
 
 ## 12. Out of scope (do not build)
 
 - Authentication / accounts.
-- Real GitHub integration.
-- A real backend / shared database.
+- Real GitHub integration (M12 is a visual mock only).
 - Mobile responsive — desktop only is fine.
 - Multi-team support.
 - Real-time collaboration.
+- Any backend.
 
 ## 13. Definition of done
 
@@ -163,8 +165,9 @@ The hackathon is "done" when all 13 milestone tags are pushed to your repo and v
 
 - The board loads on Vercel without errors.
 - The "Copy as Prompt Context" demo works on stage.
-- 5 min pitch is rehearsed.
+- One paragraph pitch is written.
+- A 60-second backup demo video has been recorded.
 
 ---
 
-_PRD version: hackathon-starter v1 · maintained by Prof. Dr. Ignacio Alvarez_
+*PRD version: hackathon-starter v1 · maintained by Prof. Dr. Ignacio Alvarez*
